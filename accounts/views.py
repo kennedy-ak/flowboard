@@ -15,7 +15,7 @@ from .forms import UserRegistrationForm, UserLoginForm, CustomPasswordResetForm
 def register_view(request):
     """
     User registration view.
-    Handles invitation tokens if present.
+    Handles invitation tokens and organization creation/joining.
     """
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -36,9 +36,40 @@ def register_view(request):
             del request.session['invitation_token']
 
     if request.method == 'POST':
+        from .forms import OrganizationCreateForm, OrganizationJoinForm
+        from .models import Organization
+
         form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
+        org_type = request.POST.get('organization_type')
+        org_create_form = OrganizationCreateForm(request.POST) if org_type == 'create' else OrganizationCreateForm()
+        org_join_form = OrganizationJoinForm(request.POST) if org_type == 'join' else OrganizationJoinForm()
+
+        # Validate based on organization type
+        org_valid = True
+        organization = None
+
+        if org_type == 'create':
+            org_valid = org_create_form.is_valid()
+        elif org_type == 'join':
+            org_valid = org_join_form.is_valid()
+            if org_valid:
+                organization = org_join_form.cleaned_data.get('organization')
+
+        if form.is_valid() and org_valid:
+            user = form.save(commit=False)
+
+            # Handle organization
+            if org_type == 'create':
+                # Create new organization
+                organization = org_create_form.save(commit=False)
+                organization.created_by = user
+                organization.save()
+                user.organization = organization
+            elif org_type == 'join':
+                # Join existing organization
+                user.organization = organization
+
+            user.save()
             login(request, user)
 
             # If there's a valid invitation, accept it
@@ -48,15 +79,25 @@ def register_view(request):
                 messages.success(request, f'Registration successful! You have been added to {invitation.workspace.name}.')
                 return redirect('workspaces:detail', pk=invitation.workspace.pk)
             else:
-                messages.success(request, 'Registration successful! Welcome to FlowBoard.')
+                if org_type == 'create':
+                    messages.success(request, f'Registration successful! Your organization code is: {organization.code}. Share this code with your team members.')
+                elif org_type == 'join':
+                    messages.success(request, f'Registration successful! You have joined {organization.name}.')
+                else:
+                    messages.success(request, 'Registration successful! Welcome to FlowBoard.')
                 return redirect('dashboard')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
+        from .forms import OrganizationCreateForm, OrganizationJoinForm
         form = UserRegistrationForm()
+        org_create_form = OrganizationCreateForm()
+        org_join_form = OrganizationJoinForm()
 
     context = {
         'form': form,
+        'org_create_form': org_create_form,
+        'org_join_form': org_join_form,
         'invitation': invitation
     }
     return render(request, 'accounts/register.html', context)

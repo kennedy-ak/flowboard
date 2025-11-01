@@ -19,4 +19,10 @@ urlpatterns = [
     path('<int:pk>/invitations/send/', views.workspace_invite_user, name='invite_user'),
     path('<int:pk>/invitations/<int:invitation_id>/revoke/', views.workspace_revoke_invitation, name='revoke_invitation'),
     path('invite/<str:token>/', views.accept_invitation, name='accept_invitation'),
+
+    # File Management URLs
+    path('<int:pk>/files/', views.workspace_files_list, name='files'),
+    path('<int:pk>/files/upload/', views.workspace_file_upload, name='file_upload'),
+    path('<int:pk>/files/add-link/', views.workspace_link_add, name='link_add'),
+    path('<int:pk>/files/<int:file_id>/delete/', views.workspace_file_delete, name='file_delete'),
 ]

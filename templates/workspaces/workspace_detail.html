@@ -128,5 +128,71 @@
             </div>
         </div>
     </div>
+
+    <!-- Files Section -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-folder"></i> Files & Links</h5>
+                    <a href="{% url 'workspaces:files' workspace.pk %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-list"></i> View All Files
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if workspace.files.all %}
+                        <div class="list-group list-group-flush">
+                            {% for file in workspace.files.all|slice:":5" %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        {% if file.file_type == 'upload' %}
+                                            <i class="bi bi-file-earmark text-primary me-3" style="font-size: 1.5rem;"></i>
+                                        {% else %}
+                                            <i class="bi bi-link-45deg text-success me-3" style="font-size: 1.5rem;"></i>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold">{{ file.name }}</div>
+                                            <small class="text-muted">
+                                                Uploaded by {{ file.uploaded_by.username }} on {{ file.uploaded_at|date:"M d, Y" }}
+                                                {% if file.file_type == 'upload' %} - {{ file.file_size_display }}{% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {% if file.file_type == 'upload' %}
+                                            <a href="{{ file.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ file.external_url }}" class="btn btn-sm btn-outline-success" target="_blank">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if workspace.files.count > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'workspaces:files' workspace.pk %}" class="btn btn-sm btn-outline-primary">
+                                View All {{ workspace.files.count }} Files
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            <i class="bi bi-folder-x" style="font-size: 2rem;"></i><br>
+                            No files or links yet.
+                            {% if is_admin %}
+                            <a href="{% url 'workspaces:files' workspace.pk %}">Add some now</a>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

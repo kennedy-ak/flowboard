@@ -106,3 +106,63 @@ class WorkspaceInvitation(models.Model):
     class Meta:
         db_table = 'workspace_invitations'
         ordering = ['-created_at']
+
+
+class WorkspaceFile(models.Model):
+    """
+    Files and links associated with a workspace.
+    Admins can upload files or add links to external resources.
+    """
+    FILE_TYPE_CHOICES = [
+        ('upload', 'Uploaded File'),
+        ('link', 'External Link'),
+    ]
+
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='files')
+    name = models.CharField(max_length=255, help_text="File or link name")
+    description = models.TextField(blank=True, help_text="Optional description")
+    file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, default='upload')
+
+    # For uploaded files
+    file = models.FileField(upload_to='workspace_files/%Y/%m/%d/', blank=True, null=True, help_text="Upload a file")
+
+    # For external links
+    external_url = models.URLField(max_length=500, blank=True, null=True, help_text="Link to external file (Google Drive, Dropbox, etc.)")
+
+    # Metadata
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='uploaded_files')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file_size = models.BigIntegerField(blank=True, null=True, help_text="File size in bytes")
+
+    def __str__(self):
+        return f"{self.name} - {self.workspace.name}"
+
+    @property
+    def file_size_display(self):
+        """Return human-readable file size."""
+        if not self.file_size:
+            return "N/A"
+
+        size = self.file_size
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024.0:
+                return f"{size:.1f} {unit}"
+            size /= 1024.0
+        return f"{size:.1f} TB"
+
+    @property
+    def file_extension(self):
+        """Get file extension."""
+        if self.file_type == 'upload' and self.file:
+            return self.file.name.split('.')[-1].upper()
+        return None
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate file size for uploaded files
+        if self.file and not self.file_size:
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = 'workspace_files'
+        ordering = ['-uploaded_at']

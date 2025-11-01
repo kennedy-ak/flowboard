@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count
-from .models import Workspace, WorkspaceMember, WorkspaceInvitation
-from .forms import WorkspaceForm, WorkspaceMemberForm, WorkspaceInvitationForm
+from .models import Workspace, WorkspaceMember, WorkspaceInvitation, WorkspaceFile
+from .forms import WorkspaceForm, WorkspaceMemberForm, WorkspaceInvitationForm, WorkspaceFileUploadForm, WorkspaceLinkForm
 from .decorators import workspace_member_required, workspace_admin_required
 from accounts.models import User
 
@@ -165,9 +165,27 @@ def workspace_add_member(request, pk):
     else:
         form = WorkspaceMemberForm()
 
-    # Get users who are not already members
+    # Get users who are not already members AND from the same organization
     existing_member_ids = workspace.members.values_list('user_id', flat=True)
-    form.fields['user'].queryset = User.objects.exclude(id__in=existing_member_ids)
+
+    # Filter users: must be from same organization as the requesting user
+    if request.user.organization:
+        # Show only users from the same organization
+        available_users = User.objects.filter(
+            organization=request.user.organization
+        ).exclude(id__in=existing_member_ids)
+    else:
+        # If user has no organization, they can't add anyone
+        available_users = User.objects.none()
+
+    form.fields['user'].queryset = available_users
+
+    # Add warning message if no users are available
+    if not available_users.exists():
+        if not request.user.organization:
+            messages.info(request, 'You must join an organization before you can add members to workspaces.')
+        else:
+            messages.info(request, 'No users from your organization are available to add. Share your organization code to invite more members.')
 
     context = {
         'form': form,
@@ -375,3 +393,112 @@ def accept_invitation(request, token):
         request.session['invitation_token'] = token
         messages.info(request, f'Please register or login to accept the invitation to {invitation.workspace.name}.')
         return redirect('accounts:register')
+
+
+# File Management Views
+
+@login_required
+@workspace_member_required()
+def workspace_files_list(request, pk):
+    """
+    List all files and links in a workspace.
+    All members can view files.
+    """
+    workspace = request.workspace
+    membership = request.workspace_membership
+
+    files = WorkspaceFile.objects.filter(workspace=workspace).select_related('uploaded_by')
+
+    context = {
+        'workspace': workspace,
+        'membership': membership,
+        'files': files,
+        'is_admin': membership.role == 'admin',
+    }
+    return render(request, 'workspaces/workspace_files.html', context)
+
+
+@login_required
+@workspace_admin_required
+def workspace_file_upload(request, pk):
+    """
+    Upload a file to the workspace.
+    Only admins can upload files.
+    """
+    workspace = request.workspace
+
+    if request.method == 'POST':
+        form = WorkspaceFileUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            workspace_file = form.save(commit=False)
+            workspace_file.workspace = workspace
+            workspace_file.uploaded_by = request.user
+            workspace_file.file_type = 'upload'
+            workspace_file.save()
+            messages.success(request, f'File "{workspace_file.name}" uploaded successfully!')
+            return redirect('workspaces:files', pk=pk)
+    else:
+        form = WorkspaceFileUploadForm()
+
+    context = {
+        'form': form,
+        'workspace': workspace,
+        'action': 'Upload File'
+    }
+    return render(request, 'workspaces/workspace_file_form.html', context)
+
+
+@login_required
+@workspace_admin_required
+def workspace_link_add(request, pk):
+    """
+    Add an external link to the workspace.
+    Only admins can add links.
+    """
+    workspace = request.workspace
+
+    if request.method == 'POST':
+        form = WorkspaceLinkForm(request.POST)
+        if form.is_valid():
+            workspace_link = form.save(commit=False)
+            workspace_link.workspace = workspace
+            workspace_link.uploaded_by = request.user
+            workspace_link.file_type = 'link'
+            workspace_link.save()
+            messages.success(request, f'Link "{workspace_link.name}" added successfully!')
+            return redirect('workspaces:files', pk=pk)
+    else:
+        form = WorkspaceLinkForm()
+
+    context = {
+        'form': form,
+        'workspace': workspace,
+        'action': 'Add External Link'
+    }
+    return render(request, 'workspaces/workspace_link_form.html', context)
+
+
+@login_required
+@workspace_admin_required
+def workspace_file_delete(request, pk, file_id):
+    """
+    Delete a file or link from the workspace.
+    Only admins can delete files.
+    """
+    workspace = request.workspace
+    workspace_file = get_object_or_404(WorkspaceFile, pk=file_id, workspace=workspace)
+
+    if request.method == 'POST':
+        file_name = workspace_file.name
+        # Delete the actual file if it's an upload
+        if workspace_file.file_type == 'upload' and workspace_file.file:
+            workspace_file.file.delete()
+        workspace_file.delete()
+        messages.success(request, f'"{file_name}" deleted successfully!')
+        return redirect('workspaces:files', pk=pk)
+
+    context = {
+        'workspace': workspace,
+        'file': workspace_file
+    }
+    return render(request, 'workspaces/workspace_file_confirm_delete.html', context)

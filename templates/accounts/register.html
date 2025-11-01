@@ -94,6 +94,86 @@
                             {% endif %}
                         </div>
 
+                        <hr class="my-4">
+
+                        <!-- Organization Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-building"></i> Organization (Optional)
+                            </label>
+                            <div class="form-text mb-3">
+                                Organizations allow you to collaborate with team members. Only users from your organization can be added to your workspaces.
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="organization_type" id="org_none" value="none" checked>
+                                    <label class="form-check-label" for="org_none">
+                                        <strong>Skip for now</strong> - I'll join or create an organization later
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="organization_type" id="org_create" value="create">
+                                    <label class="form-check-label" for="org_create">
+                                        <strong>Create New Organization</strong> - I'm the first person from my organization
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="organization_type" id="org_join" value="join">
+                                    <label class="form-check-label" for="org_join">
+                                        <strong>Join Existing Organization</strong> - I have an organization code
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Create Organization Form -->
+                            <div id="create_org_form" style="display: none;" class="border rounded p-3 bg-light">
+                                <h6 class="mb-3">Create Your Organization</h6>
+                                <div class="mb-3">
+                                    <label for="{{ org_create_form.name.id_for_label }}" class="form-label">
+                                        Organization Name <span class="text-danger">*</span>
+                                    </label>
+                                    {{ org_create_form.name }}
+                                    {% if org_create_form.name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in org_create_form.name.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ org_create_form.description.id_for_label }}" class="form-label">
+                                        Description
+                                    </label>
+                                    {{ org_create_form.description }}
+                                    {% if org_create_form.description.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in org_create_form.description.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="alert alert-info small mb-0">
+                                    <i class="bi bi-info-circle"></i> After registration, you'll receive a unique organization code to share with your team members.
+                                </div>
+                            </div>
+
+                            <!-- Join Organization Form -->
+                            <div id="join_org_form" style="display: none;" class="border rounded p-3 bg-light">
+                                <h6 class="mb-3">Join Organization</h6>
+                                <div class="mb-3">
+                                    <label for="{{ org_join_form.organization_code.id_for_label }}" class="form-label">
+                                        {{ org_join_form.organization_code.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ org_join_form.organization_code }}
+                                    {% if org_join_form.organization_code.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in org_join_form.organization_code.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">{{ org_join_form.organization_code.help_text }}</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="submit" class="btn btn-primary w-100 mb-3">
                             <i class="bi bi-person-check"></i> Create Account
                         </button>
@@ -108,4 +188,27 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Show/hide organization forms based on radio selection
+    document.addEventListener('DOMContentLoaded', function() {
+        const orgNone = document.getElementById('org_none');
+        const orgCreate = document.getElementById('org_create');
+        const orgJoin = document.getElementById('org_join');
+        const createForm = document.getElementById('create_org_form');
+        const joinForm = document.getElementById('join_org_form');
+
+        function updateFormVisibility() {
+            createForm.style.display = orgCreate.checked ? 'block' : 'none';
+            joinForm.style.display = orgJoin.checked ? 'block' : 'none';
+        }
+
+        orgNone.addEventListener('change', updateFormVisibility);
+        orgCreate.addEventListener('change', updateFormVisibility);
+        orgJoin.addEventListener('change', updateFormVisibility);
+
+        // Initialize visibility
+        updateFormVisibility();
+    });
+</script>
 {% endblock %}

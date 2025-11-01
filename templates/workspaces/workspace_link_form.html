@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} - {{ workspace.name }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:list' %}">Workspaces</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:detail' workspace.pk %}">{{ workspace.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:files' workspace.pk %}">Files</a></li>
+                    <li class="breadcrumb-item active">{{ action }}</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-link-45deg"></i> {{ action }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Link Name -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {{ form.name.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.name.help_text %}
+                                <div class="form-text">{{ form.name.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- External URL -->
+                        <div class="mb-3">
+                            <label for="{{ form.external_url.id_for_label }}" class="form-label">
+                                {{ form.external_url.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.external_url }}
+                            {% if form.external_url.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.external_url.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.external_url.help_text %}
+                                <div class="form-text">{{ form.external_url.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Examples:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Google Drive: https://drive.google.com/file/d/...</li>
+                                <li>Dropbox: https://www.dropbox.com/s/...</li>
+                                <li>OneDrive: https://onedrive.live.com/...</li>
+                                <li>Any public file URL</li>
+                            </ul>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'workspaces:files' workspace.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Add Link
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
