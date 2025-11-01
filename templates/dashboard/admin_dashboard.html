@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Admin Dashboard</h2>
+            <p class="text-muted">Overview of all workspaces, projects, and users</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Workspaces</h5>
+                    <h2>{{ total_workspaces }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Projects</h5>
+                    <h2>{{ total_projects }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Completed Tasks</h5>
+                    <h2>{{ completed_tasks }}/{{ total_tasks }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">In Progress</h5>
+                    <h2>{{ in_progress_tasks }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workspaces Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Workspaces</h5>
+                    <a href="{% url 'workspaces:create' %}" class="btn btn-sm btn-primary">Create Workspace</a>
+                </div>
+                <div class="card-body">
+                    {% if workspaces %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Projects</th>
+                                    <th>Members</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for workspace in workspaces %}
+                                <tr>
+                                    <td><a href="{% url 'workspaces:detail' workspace.pk %}">{{ workspace.name }}</a></td>
+                                    <td>{{ workspace.project_count }}</td>
+                                    <td>{{ workspace.member_count }}</td>
+                                    <td>{{ workspace.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'workspaces:detail' workspace.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                                        <a href="{% url 'workspaces:edit' workspace.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No workspaces yet. Create your first workspace to get started.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Alerts -->
+    <div class="row mb-4">
+        <!-- Overdue Tasks -->
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Overdue Tasks ({{ overdue_tasks|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if overdue_tasks %}
+                    <ul class="list-group list-group-flush">
+                        {% for task in overdue_tasks %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a>
+                                <small class="d-block text-muted">{{ task.project.name }}</small>
+                            </div>
+                            <span class="badge bg-danger">{{ task.due_date|date:"M d" }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0">No overdue tasks.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Tasks -->
+        <div class="col-md-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Upcoming Tasks (Next 7 Days)</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_tasks %}
+                    <ul class="list-group list-group-flush">
+                        {% for task in upcoming_tasks %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a>
+                                <small class="d-block text-muted">{{ task.project.name }}</small>
+                            </div>
+                            <span class="badge bg-warning">{{ task.due_date|date:"M d" }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0">No upcoming tasks.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Projects and Tasks -->
+    <div class="row">
+        <!-- Recent Projects -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Projects</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_projects %}
+                    <ul class="list-group list-group-flush">
+                        {% for project in recent_projects %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'projects:detail' project.pk %}">{{ project.name }}</a>
+                                <small class="d-block text-muted">{{ project.workspace.name }} - {{ project.task_count }} tasks</small>
+                            </div>
+                            <small class="text-muted">{{ project.created_at|date:"M d" }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'projects:list' %}" class="btn btn-sm btn-link mt-2">View all projects</a>
+                    {% else %}
+                    <p class="text-muted mb-0">No projects yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Tasks -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Tasks</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_tasks %}
+                    <ul class="list-group list-group-flush">
+                        {% for task in recent_tasks %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a>
+                                <small class="d-block text-muted">{{ task.project.name }}</small>
+                            </div>
+                            <span class="badge bg-{% if task.status == 'done' %}success{% elif task.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-link mt-2">View all tasks</a>
+                    {% else %}
+                    <p class="text-muted mb-0">No tasks yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

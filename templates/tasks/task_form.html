@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Task{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header"><h4><i class="bi bi-list-task"></i> {% if is_edit %}Edit{% else %}Create{% endif %} Task</h4></div>
+                <div class="card-body">
+                    <form method="post">{% csrf_token %}
+                        <div class="mb-3"><label class="form-label">Project *</label>{{ form.project }}{% if form.project.errors %}<div class="text-danger small">{{ form.project.errors }}</div>{% endif %}</div>
+                        <div class="mb-3"><label class="form-label">Sprint</label>{{ form.sprint }}{% if form.sprint.errors %}<div class="text-danger small">{{ form.sprint.errors }}</div>{% endif %}</div>
+                        <div class="mb-3"><label class="form-label">Title *</label>{{ form.title }}{% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}</div>
+                        <div class="mb-3"><label class="form-label">Description</label>{{ form.description }}{% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}</div>
+                        <div class="mb-3"><label class="form-label">Status</label>{{ form.status }}{% if form.status.errors %}<div class="text-danger small">{{ form.status.errors }}</div>{% endif %}</div>
+                        <div class="mb-3"><label class="form-label">Due Date</label>{{ form.due_date }}{% if form.due_date.errors %}<div class="text-danger small">{{ form.due_date.errors }}</div>{% endif %}</div>
+                        <div class="mb-3"><label class="form-label">Assign To</label>{{ form.assigned_to }}{% if form.assigned_to.errors %}<div class="text-danger small">{{ form.assigned_to.errors }}</div>{% endif %}</div>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check"></i> {% if is_edit %}Update{% else %}Create{% endif %}</button>
+                        <a href="{% if is_edit %}{% url 'tasks:detail' task.pk %}{% else %}{% url 'tasks:list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

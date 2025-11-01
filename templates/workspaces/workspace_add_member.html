@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Member - {{ workspace.name }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-person-plus"></i> Add Member to {{ workspace.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.user.id_for_label }}" class="form-label">
+                                <i class="bi bi-person"></i> User <span class="text-danger">*</span>
+                            </label>
+                            {{ form.user }}
+                            {% if form.user.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.user.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.role.id_for_label }}" class="form-label">
+                                <i class="bi bi-shield"></i> Role <span class="text-danger">*</span>
+                            </label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.role.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <ul class="small mb-0">
+                                    <li><strong>Admin:</strong> Full control over workspace, projects, and members</li>
+                                    <li><strong>Project Manager:</strong> Can manage projects, tasks, and assignments</li>
+                                    <li><strong>Member:</strong> Can update assigned tasks and comment</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Add Member
+                            </button>
+                            <a href="{% url 'workspaces:members' workspace.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

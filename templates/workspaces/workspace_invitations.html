@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Invitations - {{ workspace.name }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'workspaces:detail' workspace.pk %}">{{ workspace.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Invitations</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Workspace Invitations</h2>
+            <p class="text-muted">Manage invitations for {{ workspace.name }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'workspaces:invite_user' workspace.pk %}" class="btn btn-primary">
+                <i class="bi bi-envelope-plus"></i> Send Invitation
+            </a>
+        </div>
+    </div>
+
+    <!-- Pending Invitations -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Pending Invitations ({{ pending_invitations|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_invitations %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Sent By</th>
+                            <th>Sent</th>
+                            <th>Expires</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitation in pending_invitations %}
+                        <tr>
+                            <td>{{ invitation.email }}</td>
+                            <td><span class="badge bg-info">{{ invitation.get_role_display }}</span></td>
+                            <td>{{ invitation.created_by.username }}</td>
+                            <td>{{ invitation.created_at|date:"M d, Y H:i" }}</td>
+                            <td>{{ invitation.expires_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyInvitationLink('{{ invitation.token }}')">
+                                    <i class="bi bi-link"></i> Copy Link
+                                </button>
+                                <a href="{% url 'workspaces:revoke_invitation' workspace.pk invitation.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x-circle"></i> Revoke
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No pending invitations. Send an invitation to invite users to this workspace.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Used Invitations -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Accepted Invitations ({{ used_invitations|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if used_invitations %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Accepted By</th>
+                            <th>Accepted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitation in used_invitations %}
+                        <tr>
+                            <td>{{ invitation.email }}</td>
+                            <td><span class="badge bg-success">{{ invitation.get_role_display }}</span></td>
+                            <td>{{ invitation.used_by.username }}</td>
+                            <td>{{ invitation.used_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No accepted invitations yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Expired Invitations -->
+    {% if expired_invitations %}
+    <div class="card">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Expired Invitations ({{ expired_invitations|length }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Sent</th>
+                            <th>Expired</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invitation in expired_invitations %}
+                        <tr>
+                            <td>{{ invitation.email }}</td>
+                            <td><span class="badge bg-secondary">{{ invitation.get_role_display }}</span></td>
+                            <td>{{ invitation.created_at|date:"M d, Y" }}</td>
+                            <td>{{ invitation.expires_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'workspaces:revoke_invitation' workspace.pk invitation.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function copyInvitationLink(token) {
+    const baseUrl = window.location.origin;
+    const invitationUrl = `${baseUrl}/workspaces/invite/${token}/`;
+
+    navigator.clipboard.writeText(invitationUrl).then(function() {
+        alert('Invitation link copied to clipboard!');
+    }, function(err) {
+        alert('Failed to copy link: ' + err);
+    });
+}
+</script>
+{% endblock %}

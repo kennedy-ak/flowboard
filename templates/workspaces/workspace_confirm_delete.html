@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Workspace - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirm Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to delete the workspace "<strong>{{ workspace.name }}</strong>"?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All projects, tasks, and data within this workspace will be permanently deleted.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Yes, Delete Workspace
+                            </button>
+                            <a href="{% url 'workspaces:detail' workspace.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

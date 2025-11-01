@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Tasks - FlowBoard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2><i class="bi bi-list-task"></i> Tasks</h2>
+    <div class="mb-3">
+        <a href="{% url 'tasks:create' %}" class="btn btn-primary"><i class="bi bi-plus"></i> New Task</a>
+        <div class="btn-group ms-2">
+            <a href="?" class="btn {% if not status_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+            <a href="?status=todo" class="btn {% if status_filter == 'todo' %}btn-primary{% else %}btn-outline-primary{% endif %}">To Do</a>
+            <a href="?status=in_progress" class="btn {% if status_filter == 'in_progress' %}btn-primary{% else %}btn-outline-primary{% endif %}">In Progress</a>
+            <a href="?status=done" class="btn {% if status_filter == 'done' %}btn-primary{% else %}btn-outline-primary{% endif %}">Done</a>
+        </div>
+    </div>
+    {% for task in tasks %}
+    <div class="card task-card mb-2">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div class="flex-grow-1">
+                    <h5><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></h5>
+                    <small class="text-muted">{{ task.project.name }} • {{ task.created_by.username }}</small>
+                </div>
+                <span class="badge {% if task.status == 'done' %}bg-success{% elif task.status == 'in_progress' %}bg-primary{% else %}bg-secondary{% endif %}">{{ task.get_status_display }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">No tasks found.</p>
+    {% endfor %}
+</div>
+{% endblock %}

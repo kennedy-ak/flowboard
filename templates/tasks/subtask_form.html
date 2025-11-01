@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Subtask - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'projects:detail' task.project.pk %}">{{ task.project.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{% if is_edit %}Edit{% else %}Create{% endif %} Subtask</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">{% if is_edit %}Edit{% else %}Create{% endif %} Subtask</h4>
+                    <small class="text-muted">Task: {{ task.title }}</small>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Title <span class="text-danger">*</span></label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger small">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label for="id_status" class="form-label">Status <span class="text-danger">*</span></label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger small">{{ form.status.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="mb-3">
+                            <label for="id_due_date" class="form-label">Due Date</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}
+                            <div class="text-danger small">{{ form.due_date.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Format: YYYY-MM-DD</small>
+                        </div>
+
+                        <!-- Assigned To -->
+                        <div class="mb-3">
+                            <label for="id_assigned_to" class="form-label">Assign To</label>
+                            {{ form.assigned_to }}
+                            {% if form.assigned_to.errors %}
+                            <div class="text-danger small">{{ form.assigned_to.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Hold Ctrl (Cmd on Mac) to select multiple users</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'tasks:detail' task.pk %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if is_edit %}Update{% else %}Create{% endif %} Subtask
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

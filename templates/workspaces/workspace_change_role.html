@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Change Role - {{ workspace.name }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-arrow-repeat"></i> Change Member Role</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        Change role for <strong>{{ member.user.username }}</strong> in <strong>{{ workspace.name }}</strong>
+                    </p>
+                    <p class="text-muted">Current role: <span class="badge {% if member.role == 'admin' %}bg-danger{% elif member.role == 'pm' %}bg-warning{% else %}bg-secondary{% endif %}">{{ member.get_role_display }}</span></p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">
+                                <i class="bi bi-shield"></i> New Role <span class="text-danger">*</span>
+                            </label>
+                            <select name="role" id="role" class="form-select" required>
+                                <option value="admin" {% if member.role == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="pm" {% if member.role == 'pm' %}selected{% endif %}>Project Manager</option>
+                                <option value="member" {% if member.role == 'member' %}selected{% endif %}>Member</option>
+                            </select>
+                            <div class="form-text">
+                                <ul class="small mb-0">
+                                    <li><strong>Admin:</strong> Full control over workspace, projects, and members</li>
+                                    <li><strong>Project Manager:</strong> Can manage projects, tasks, and assignments</li>
+                                    <li><strong>Member:</strong> Can update assigned tasks and comment</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Role
+                            </button>
+                            <a href="{% url 'workspaces:members' workspace.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FlowBoard - Project Management{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .navbar-nav .dropdown-menu {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .workspace-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+        .quick-create-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+        .quick-create-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <!-- Enhanced Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container-fluid">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
+                <i class="bi bi-kanban-fill"></i> FlowBoard
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Left Side Navigation -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                           href="{% url 'dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Workspaces Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="workspacesDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-building"></i> Workspaces
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="workspacesDropdown">
+                            <li><a class="dropdown-item" href="{% url 'workspaces:list' %}">
+                                <i class="bi bi-list"></i> All Workspaces
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'workspaces:create' %}">
+                                <i class="bi bi-plus-circle"></i> Create Workspace
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Projects Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-folder"></i> Projects
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="projectsDropdown">
+                            <li><a class="dropdown-item" href="{% url 'projects:list' %}">
+                                <i class="bi bi-list"></i> All Projects
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'projects:create' %}">
+                                <i class="bi bi-plus-circle"></i> Create Project
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Tasks Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="tasksDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-check2-square"></i> Tasks
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="tasksDropdown">
+                            <li><a class="dropdown-item" href="{% url 'tasks:list' %}">
+                                <i class="bi bi-list"></i> All Tasks
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks:create' %}">
+                                <i class="bi bi-plus-circle"></i> Create Task
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks:list' %}?status=todo">
+                                <i class="bi bi-circle"></i> To Do
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks:list' %}?status=in_progress">
+                                <i class="bi bi-arrow-repeat"></i> In Progress
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks:list' %}?status=done">
+                                <i class="bi bi-check-circle"></i> Done
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Right Side Navigation -->
+                <ul class="navbar-nav">
+                    <!-- Quick Create Button -->
+                    <li class="nav-item dropdown me-2">
+                        <button class="btn btn-sm quick-create-btn text-white dropdown-toggle" type="button"
+                                id="quickCreateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-plus-lg"></i> Quick Create
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quickCreateDropdown">
+                            <li><h6 class="dropdown-header">Create New</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'workspaces:create' %}">
+                                <i class="bi bi-building text-primary"></i> Workspace
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'projects:create' %}">
+                                <i class="bi bi-folder text-info"></i> Project
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks:create' %}">
+                                <i class="bi bi-check2-square text-success"></i> Task
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Notifications (Placeholder) -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="#" title="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size: 0.6rem; display: none;">
+                                0
+                            </span>
+                        </a>
+                    </li>
+
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><h6 class="dropdown-header">
+                                <i class="bi bi-person"></i> {{ user.email }}
+                            </h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">
+                                <i class="bi bi-speedometer2"></i> My Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks:list' %}">
+                                <i class="bi bi-list-task"></i> My Tasks
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'workspaces:list' %}">
+                                <i class="bi bi-building"></i> My Workspaces
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="bi bi-gear"></i> Settings
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="bi bi-question-circle"></i> Help & Support
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}" class="d-inline w-100">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="{% if user.is_authenticated %}container-fluid mt-4{% endif %}">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 bg-light border-top">
+        <div class="container">
+            {% if user.is_authenticated %}
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-kanban"></i> FlowBoard</h6>
+                    <p class="text-muted small">
+                        Project management made simple.<br>
+                        Organize, collaborate, and deliver.
+                    </p>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6 class="fw-bold">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url 'dashboard' %}" class="text-muted text-decoration-none">Dashboard</a></li>
+                        <li><a href="{% url 'workspaces:list' %}" class="text-muted text-decoration-none">Workspaces</a></li>
+                        <li><a href="{% url 'projects:list' %}" class="text-muted text-decoration-none">Projects</a></li>
+                        <li><a href="{% url 'tasks:list' %}" class="text-muted text-decoration-none">Tasks</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h6 class="fw-bold">Resources</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#" class="text-muted text-decoration-none">Help Center</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Documentation</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Keyboard Shortcuts</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">API Reference</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h6 class="fw-bold">Account</h6>
+                    <ul class="list-unstyled small">
+                        <li><span class="text-muted">{{ user.username }}</span></li>
+                        <li><span class="text-muted small">{{ user.email }}</span></li>
+                        <li class="mt-2">
+                            <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link btn-sm p-0 text-muted text-decoration-none">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            {% endif %}
+            <div class="row">
+                <div class="col-12 text-center text-muted small">
+                    <p class="mb-0">&copy; 2025 FlowBoard. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    {% if user.is_authenticated %}
+    <button type="button" class="btn btn-primary btn-floating position-fixed bottom-0 end-0 m-4"
+            id="btn-back-to-top" style="display: none; border-radius: 50%; width: 50px; height: 50px; z-index: 1000;">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+    {% endif %}
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Back to Top Script -->
+    <script>
+        // Back to top button functionality
+        let backToTopBtn = document.getElementById("btn-back-to-top");
+
+        if (backToTopBtn) {
+            window.onscroll = function() {
+                if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                    backToTopBtn.style.display = "block";
+                } else {
+                    backToTopBtn.style.display = "none";
+                }
+            };
+
+            backToTopBtn.addEventListener("click", function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

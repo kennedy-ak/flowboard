@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Sprint - FlowBoard{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header"><h4 class="mb-0"><i class="bi bi-speedometer2"></i> {% if is_edit %}Edit{% else %}Create{% endif %} Sprint</h4></div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Sprint Name <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger small mt-1">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}<div class="text-danger small mt-1">{% for error in form.start_date.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">End Date <span class="text-danger">*</span></label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}<div class="text-danger small mt-1">{% for error in form.end_date.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status <span class="text-danger">*</span></label>
+                            {{ form.status }}
+                            {% if form.status.errors %}<div class="text-danger small mt-1">{% for error in form.status.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                        {% if form.non_field_errors %}<div class="alert alert-danger">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% if is_edit %}Update{% else %}Create{% endif %}</button>
+                        <a href="{% url 'projects:detail' project.pk %}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

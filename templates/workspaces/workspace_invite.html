@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Invite User - {{ workspace.name }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:detail' workspace.pk %}">{{ workspace.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:invitations' workspace.pk %}">Invitations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Send Invitation</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Invite User to {{ workspace.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Send an email invitation to invite someone to join this workspace.
+                        The invitation will be valid for 7 days.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Recipient Name -->
+                        <div class="mb-3">
+                            <label for="id_recipient_name" class="form-label">{{ form.recipient_name.label }} <span class="text-danger">*</span></label>
+                            {{ form.recipient_name }}
+                            {% if form.recipient_name.errors %}
+                            <div class="text-danger small">{{ form.recipient_name.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.recipient_name.help_text }}</small>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">{{ form.email.label }} <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.email.help_text }}</small>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="id_recipient_phone" class="form-label">{{ form.recipient_phone.label }}</label>
+                            {{ form.recipient_phone }}
+                            {% if form.recipient_phone.errors %}
+                            <div class="text-danger small">{{ form.recipient_phone.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.recipient_phone.help_text }}</small>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="mb-3">
+                            <label for="id_role" class="form-label">{{ form.role.label }} <span class="text-danger">*</span></label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                            <div class="text-danger small">{{ form.role.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.role.help_text }}</small>
+                        </div>
+
+                        <!-- Role Descriptions -->
+                        <div class="alert alert-info">
+                            <strong>Role Descriptions:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Admin:</strong> Full control over the workspace, projects, and users</li>
+                                <li><strong>Project Manager:</strong> Can manage projects, tasks, and assignments</li>
+                                <li><strong>Member:</strong> Can view tasks and update assigned tasks</li>
+                            </ul>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'workspaces:invitations' workspace.pk %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Send Invitation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

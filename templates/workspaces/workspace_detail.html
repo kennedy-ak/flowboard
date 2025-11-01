@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ workspace.name }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Workspace Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'workspaces:list' %}">Workspaces</a></li>
+                            <li class="breadcrumb-item active">{{ workspace.name }}</li>
+                        </ol>
+                    </nav>
+                    <h2><i class="bi bi-building"></i> {{ workspace.name }}</h2>
+                    <p class="text-muted">{{ workspace.description|default:"No description" }}</p>
+                    <span class="badge {% if membership.role == 'admin' %}bg-danger{% elif membership.role == 'pm' %}bg-warning{% else %}bg-secondary{% endif %}">
+                        Your Role: {{ membership.get_role_display }}
+                    </span>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if is_admin %}
+                    <a href="{% url 'workspaces:edit' workspace.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'workspaces:delete' workspace.pk %}" class="btn btn-outline-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Projects Section -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-folder"></i> Projects</h5>
+                    {% if is_pm %}
+                    <a href="{% url 'projects:create' %}?workspace={{ workspace.pk }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> New Project
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if projects %}
+                        <div class="list-group list-group-flush">
+                            {% for project in projects %}
+                            <a href="{% url 'projects:detail' project.pk %}"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ project.name }}</h6>
+                                        <small class="text-muted">{{ project.description|truncatewords:10 }}</small>
+                                    </div>
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'projects:list' %}?workspace={{ workspace.pk }}" class="btn btn-sm btn-outline-primary">
+                                View All Projects
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            No projects yet.
+                            {% if is_pm %}
+                            <a href="{% url 'projects:create' %}?workspace={{ workspace.pk }}">Create one now</a>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Section -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Members</h5>
+                    {% if is_admin %}
+                    <div class="btn-group w-100 mt-2" role="group">
+                        <a href="{% url 'workspaces:invite_user' workspace.pk %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-envelope-plus"></i> Invite
+                        </a>
+                        <a href="{% url 'workspaces:invitations' workspace.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-envelope-check"></i> Invitations
+                        </a>
+                    </div>
+                    <div class="d-grid mt-2">
+                        <a href="{% url 'workspaces:add_member' workspace.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-person-plus"></i> Add Existing User
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for member in members|slice:":5" %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm me-2">
+                                        {{ member.user.username|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ member.user.username }}</div>
+                                        <small class="text-muted">{{ member.get_role_display }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'workspaces:members' workspace.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-list"></i> View All Members
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

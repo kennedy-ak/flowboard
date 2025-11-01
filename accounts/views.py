@@ -1,0 +1,152 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.contrib.auth.views import (
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView
+)
+from .forms import UserRegistrationForm, UserLoginForm, CustomPasswordResetForm
+
+
+def register_view(request):
+    """
+    User registration view.
+    Handles invitation tokens if present.
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    # Check if there's an invitation token in the session
+    invitation_token = request.session.get('invitation_token')
+    invitation = None
+
+    if invitation_token:
+        from workspaces.models import WorkspaceInvitation
+        try:
+            invitation = WorkspaceInvitation.objects.get(token=invitation_token)
+            if not invitation.is_valid():
+                messages.warning(request, 'The invitation link has expired.')
+                del request.session['invitation_token']
+                invitation = None
+        except WorkspaceInvitation.DoesNotExist:
+            del request.session['invitation_token']
+
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            # If there's a valid invitation, accept it
+            if invitation:
+                invitation.accept(user)
+                del request.session['invitation_token']
+                messages.success(request, f'Registration successful! You have been added to {invitation.workspace.name}.')
+                return redirect('workspaces:detail', pk=invitation.workspace.pk)
+            else:
+                messages.success(request, 'Registration successful! Welcome to FlowBoard.')
+                return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserRegistrationForm()
+
+    context = {
+        'form': form,
+        'invitation': invitation
+    }
+    return render(request, 'accounts/register.html', context)
+
+
+def login_view(request):
+    """
+    User login view.
+    Handles invitation tokens if present.
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    # Check for invitation token in session
+    invitation_token = request.session.get('invitation_token')
+
+    if request.method == 'POST':
+        form = UserLoginForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+
+                # If there's an invitation token, accept it
+                if invitation_token:
+                    from workspaces.models import WorkspaceInvitation
+                    try:
+                        invitation = WorkspaceInvitation.objects.get(token=invitation_token)
+                        if invitation.is_valid():
+                            invitation.accept(user)
+                            del request.session['invitation_token']
+                            messages.success(request, f'Welcome back, {username}! You have been added to {invitation.workspace.name}.')
+                            return redirect('workspaces:detail', pk=invitation.workspace.pk)
+                        else:
+                            del request.session['invitation_token']
+                    except WorkspaceInvitation.DoesNotExist:
+                        del request.session['invitation_token']
+
+                messages.success(request, f'Welcome back, {username}!')
+                next_url = request.GET.get('next', 'dashboard')
+                return redirect(next_url)
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = UserLoginForm()
+
+    return render(request, 'accounts/login.html', {'form': form})
+
+
+@login_required
+def logout_view(request):
+    """
+    User logout view.
+    """
+    if request.method == 'POST':
+        logout(request)
+        messages.success(request, 'You have been logged out successfully.')
+        return redirect('accounts:login')
+    return redirect('dashboard')
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """
+    Custom password reset view.
+    """
+    form_class = CustomPasswordResetForm
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    success_url = reverse_lazy('accounts:password_reset_done')
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    """
+    Password reset done view.
+    """
+    template_name = 'accounts/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    """
+    Password reset confirm view.
+    """
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('accounts:password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    """
+    Password reset complete view.
+    """
+    template_name = 'accounts/password_reset_complete.html'

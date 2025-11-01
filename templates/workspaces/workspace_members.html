@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ workspace.name }} - Members - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:list' %}">Workspaces</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'workspaces:detail' workspace.pk %}">{{ workspace.name }}</a></li>
+                    <li class="breadcrumb-item active">Members</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-people"></i> Workspace Members</h2>
+                    <p class="text-muted">Manage {{ workspace.name }} members</p>
+                </div>
+                {% if is_admin %}
+                <div class="btn-group" role="group">
+                    <a href="{% url 'workspaces:invite_user' workspace.pk %}" class="btn btn-primary">
+                        <i class="bi bi-envelope-plus"></i> Invite User
+                    </a>
+                    <a href="{% url 'workspaces:invitations' workspace.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-envelope-check"></i> View Invitations
+                    </a>
+                    <a href="{% url 'workspaces:add_member' workspace.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-plus-circle"></i> Add Existing User
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined Date</th>
+                                    {% if is_admin %}
+                                    <th class="text-end">Actions</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in members %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                {{ member.user.username|first|upper }}
+                                            </div>
+                                            <strong>{{ member.user.username }}</strong>
+                                            {% if member.user == workspace.created_by %}
+                                            <span class="badge bg-info ms-2">Creator</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ member.user.email }}</td>
+                                    <td>
+                                        <span class="badge {% if member.role == 'admin' %}bg-danger{% elif member.role == 'pm' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ member.get_role_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ member.joined_at|date:"M d, Y" }}</td>
+                                    {% if is_admin %}
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'workspaces:change_role' workspace.pk member.pk %}"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Change Role">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                            </a>
+                                            <a href="{% url 'workspaces:remove_member' workspace.pk member.pk %}"
+                                               class="btn btn-sm btn-outline-danger"
+                                               title="Remove Member">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

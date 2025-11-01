@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Revoke Invitation - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Revoke Invitation</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">Are you sure you want to revoke this invitation?</h6>
+
+                    <div class="mt-3">
+                        <p><strong>Email:</strong> {{ invitation.email }}</p>
+                        <p><strong>Role:</strong> {{ invitation.get_role_display }}</p>
+                        <p><strong>Workspace:</strong> {{ workspace.name }}</p>
+                        <p><strong>Status:</strong>
+                            {% if invitation.is_valid %}
+                                <span class="badge bg-success">Active</span>
+                            {% elif invitation.is_used %}
+                                <span class="badge bg-info">Used</span>
+                            {% else %}
+                                <span class="badge bg-warning">Expired</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'workspaces:invitations' workspace.pk %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">
+                                {% if invitation.is_valid %}Revoke{% else %}Delete{% endif %} Invitation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

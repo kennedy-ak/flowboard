@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowBoard - Project Management Made Simple</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-hero {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            margin: 0 10px;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 60px 0;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+                <i class="bi bi-kanban"></i> FlowBoard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-light text-primary px-4 ms-2" href="{% url 'accounts:register' %}">Get Started</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-3 fw-bold mb-4">Manage Projects Like a Pro</h1>
+                    <p class="lead mb-4">
+                        FlowBoard helps teams organize work, track progress, and deliver projects on time.
+                        Simple, powerful, and built for collaboration.
+                    </p>
+                    <div class="d-flex flex-wrap">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-hero">
+                            <i class="bi bi-rocket-takeoff"></i> Start Free
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-hero">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <i class="bi bi-kanban-fill" style="font-size: 15rem; opacity: 0.2;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Everything You Need</h2>
+                <p class="lead text-muted">Powerful features to keep your team productive</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Feature 1 -->
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="bi bi-diagram-3 feature-icon"></i>
+                            <h4 class="fw-bold">Organized Workspaces</h4>
+                            <p class="text-muted">
+                                Create separate workspaces for teams, departments, or clients.
+                                Keep everything organized in one place.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="bi bi-list-check feature-icon"></i>
+                            <h4 class="fw-bold">Task Management</h4>
+                            <p class="text-muted">
+                                Break down projects into tasks and subtasks.
+                                Assign work, set deadlines, and track progress effortlessly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="bi bi-speedometer2 feature-icon"></i>
+                            <h4 class="fw-bold">Sprint Planning</h4>
+                            <p class="text-muted">
+                                Plan and execute sprints with ease.
+                                Track velocity and deliver features faster.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="bi bi-people feature-icon"></i>
+                            <h4 class="fw-bold">Team Collaboration</h4>
+                            <p class="text-muted">
+                                Invite team members with role-based permissions.
+                                Collaborate with comments and real-time updates.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="bi bi-bell feature-icon"></i>
+                            <h4 class="fw-bold">Smart Notifications</h4>
+                            <p class="text-muted">
+                                Get notified via email and SMS when tasks are assigned.
+                                Never miss important updates.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="bi bi-graph-up feature-icon"></i>
+                            <h4 class="fw-bold">Progress Tracking</h4>
+                            <p class="text-muted">
+                                Visualize project progress with dashboards.
+                                Monitor deadlines and team performance.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="stat-number">∞</div>
+                    <h5>Projects</h5>
+                    <p class="text-muted">Unlimited workspaces and projects</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-number">100%</div>
+                    <h5>Free</h5>
+                    <p class="text-muted">No credit card required</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-number">24/7</div>
+                    <h5>Access</h5>
+                    <p class="text-muted">Work from anywhere, anytime</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container text-center">
+            <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+            <p class="lead mb-4">Join teams who manage their projects better with FlowBoard</p>
+            <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-5">
+                <i class="bi bi-person-plus"></i> Create Free Account
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-kanban"></i> FlowBoard</h5>
+                    <p class="text-muted">Project management made simple</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">&copy; 2025 FlowBoard. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

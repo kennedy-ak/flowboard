@@ -1,0 +1,25 @@
+<!-- Breadcrumb Component -->
+{% if breadcrumbs %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">
+                <i class="bi bi-house-door"></i> Home
+            </a>
+        </li>
+        {% for crumb in breadcrumbs %}
+            {% if forloop.last %}
+                <li class="breadcrumb-item active" aria-current="page">{{ crumb.title }}</li>
+            {% else %}
+                <li class="breadcrumb-item">
+                    {% if crumb.url %}
+                        <a href="{{ crumb.url }}">{{ crumb.title }}</a>
+                    {% else %}
+                        {{ crumb.title }}
+                    {% endif %}
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+{% endif %}

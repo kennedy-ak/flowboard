@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }} - FlowBoard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'workspaces:detail' task.project.workspace.pk %}">{{ task.project.workspace.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'projects:detail' task.project.pk %}">{{ task.project.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ task.title }}</li>
+        </ol>
+    </nav>
+
+    <!-- Task Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ task.title }}</h2>
+            <p class="text-muted">
+                Project: <a href="{% url 'projects:detail' task.project.pk %}">{{ task.project.name }}</a>
+                {% if task.sprint %}
+                | Sprint: {{ task.sprint.name }}
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if can_edit %}
+            <a href="{% url 'tasks:edit' task.pk %}" class="btn btn-outline-primary">Edit Task</a>
+            {% endif %}
+            {% if is_pm %}
+            <a href="{% url 'tasks:delete' task.pk %}" class="btn btn-outline-danger">Delete</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Task Details -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <!-- Task Info Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Task Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Status:</strong>
+                            <span class="badge bg-{% if task.status == 'done' %}success{% elif task.status == 'in_progress' %}warning{% else %}secondary{% endif %} ms-2">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Due Date:</strong>
+                            {% if task.due_date %}
+                                <span class="{% if task.due_date < today and task.status != 'done' %}text-danger{% endif %}">
+                                    {{ task.due_date|date:"M d, Y" }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Created:</strong> {{ task.created_at|date:"M d, Y" }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p class="mt-2">{{ task.description|default:"No description provided"|linebreaks }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Created by:</strong> {{ task.created_by.username }}
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Assigned to:</strong>
+                        {% if task.assigned_to.all %}
+                            {% for user in task.assigned_to.all %}
+                                <span class="badge bg-info">{{ user.username }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">Unassigned</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Update Status Form -->
+                    {% if can_edit %}
+                    <div class="mt-4">
+                        <form method="post" action="{% url 'tasks:update_status' task.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <div class="row align-items-end">
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label"><strong>Update Status:</strong></label>
+                                    <select name="status" id="status" class="form-select">
+                                        <option value="todo" {% if task.status == 'todo' %}selected{% endif %}>To Do</option>
+                                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="done" {% if task.status == 'done' %}selected{% endif %}>Done</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary">Update Status</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Subtasks -->
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        Subtasks ({{ subtasks|length }})
+                        {% if subtasks %}
+                        - Progress: {{ task.progress_percentage }}%
+                        {% endif %}
+                    </h5>
+                    {% if is_pm %}
+                    <a href="{% url 'tasks:subtask_create' task.pk %}" class="btn btn-sm btn-primary">Add Subtask</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if subtasks %}
+                    <!-- Progress Bar -->
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {{ task.progress_percentage }}%;"
+                             aria-valuenow="{{ task.progress_percentage }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            {{ task.progress_percentage }}%
+                        </div>
+                    </div>
+
+                    <ul class="list-group">
+                        {% for subtask in subtasks %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ subtask.title }}</h6>
+                                    {% if subtask.description %}
+                                    <p class="mb-1 text-muted small">{{ subtask.description }}</p>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        Assigned to:
+                                        {% if subtask.assigned_to.all %}
+                                            {% for user in subtask.assigned_to.all %}
+                                                <span class="badge bg-info">{{ user.username }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                        {% if subtask.due_date %}
+                                        | Due: {{ subtask.due_date|date:"M d, Y" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="ms-3">
+                                    <span class="badge bg-{% if subtask.status == 'done' %}success{% elif subtask.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                                        {{ subtask.get_status_display }}
+                                    </span>
+                                    {% if is_pm or request.user in subtask.assigned_to.all %}
+                                    <div class="btn-group btn-group-sm mt-2" role="group">
+                                        <form method="post" action="{% url 'tasks:subtask_update_status' task.pk subtask.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="status" value="{% if subtask.status == 'done' %}in_progress{% else %}done{% endif %}">
+                                            <button type="submit" class="btn btn-outline-{% if subtask.status == 'done' %}warning{% else %}success{% endif %} btn-sm">
+                                                {% if subtask.status == 'done' %}Reopen{% else %}Complete{% endif %}
+                                            </button>
+                                        </form>
+                                        {% if is_pm %}
+                                        <a href="{% url 'tasks:subtask_edit' task.pk subtask.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                        <a href="{% url 'tasks:subtask_delete' task.pk subtask.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0">No subtasks yet. {% if is_pm %}Add a subtask to break down this task.{% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Comments ({{ comments|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                    <div class="mb-4">
+                        {% for comment in comments %}
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ comment.user.username }}</strong>
+                                    <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                                </div>
+                                <p class="mb-0 mt-2">{{ comment.content|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Add Comment Form -->
+                    <form method="post" action="{% url 'tasks:comment_add' task.pk %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_content" class="form-label">Add a comment:</label>
+                            {{ comment_form.content }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Comment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'projects:detail' task.project.pk %}" class="btn btn-outline-primary btn-sm">
+                            View Project
+                        </a>
+                        <a href="{% url 'tasks:list' %}?project={{ task.project.pk }}" class="btn btn-outline-secondary btn-sm">
+                            All Project Tasks
+                        </a>
+                        {% if is_pm %}
+                        <a href="{% url 'tasks:create' %}?project={{ task.project.pk }}" class="btn btn-outline-success btn-sm">
+                            Create New Task
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Task Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>Total Subtasks:</strong> {{ subtasks|length }}</li>
+                        <li><strong>Completed:</strong> {{ task.progress_percentage }}%</li>
+                        <li><strong>Comments:</strong> {{ comments|length }}</li>
+                        <li><strong>Last Updated:</strong> {{ task.updated_at|date:"M d, Y" }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
