@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'flowboard.middleware.AuthenticationDebugMiddleware',  # Uncomment to debug authentication issues
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -153,6 +154,8 @@ SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Don't expire when browser closes
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
 SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'  # Use HTTPS only in production
+SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN', None) or None  # Domain for session cookie
 
 # CSRF Configuration
 CSRF_COOKIE_SAMESITE = 'Lax'

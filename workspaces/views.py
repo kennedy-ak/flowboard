@@ -247,12 +247,6 @@ def workspace_invite_user(request, pk):
     Send an invitation to join the workspace.
     Only admins can send invitations.
     """
-    # Debug logging
-    print(f"DEBUG: User authenticated: {request.user.is_authenticated}")
-    print(f"DEBUG: User: {request.user}")
-    print(f"DEBUG: Request method: {request.method}")
-    print(f"DEBUG: Session key: {request.session.session_key}")
-
     workspace = request.workspace
 
     if request.method == 'POST':
