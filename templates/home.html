@@ -84,11 +84,26 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h1 class="display-3 fw-bold mb-4">Manage Projects Like a Pro</h1>
+                    <h1 class="display-3 fw-bold mb-4">Everything You Need, All in One Place</h1>
                     <p class="lead mb-4">
-                        FlowBoard helps teams organize work, track progress, and deliver projects on time.
-                        Simple, powerful, and built for collaboration.
+                        Stop juggling multiple tools. FlowBoard brings your workspaces, projects, tasks,
+                        and team collaboration together in one unified platform. Manage everything seamlessly
+                        and deliver projects faster.
                     </p>
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle-fill me-2" style="font-size: 1.5rem;"></i>
+                            <span>Centralized project management</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle-fill me-2" style="font-size: 1.5rem;"></i>
+                            <span>Real-time team collaboration</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2" style="font-size: 1.5rem;"></i>
+                            <span>Smart notifications & tracking</span>
+                        </div>
+                    </div>
                     <div class="d-flex flex-wrap">
                         <a href="{% url 'accounts:register' %}" class="btn btn-light btn-hero">
                             <i class="bi bi-rocket-takeoff"></i> Start Free
@@ -100,6 +115,89 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <i class="bi bi-kanban-fill" style="font-size: 15rem; opacity: 0.2;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why FlowBoard Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Why FlowBoard?</h2>
+                <p class="lead text-muted">The complete solution for modern project management</p>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4">
+                    <h3 class="fw-bold mb-3">Manage Everything in One Place</h3>
+                    <p class="text-muted mb-4">
+                        Say goodbye to scattered information across multiple apps, emails, and spreadsheets.
+                        FlowBoard centralizes all your project management needs into one intuitive platform.
+                    </p>
+
+                    <div class="mb-3">
+                        <h5 class="fw-bold"><i class="bi bi-building text-primary"></i> Workspaces</h5>
+                        <p class="text-muted">Organize teams, departments, or clients into separate workspaces. Keep everything structured and accessible.</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5 class="fw-bold"><i class="bi bi-folder text-info"></i> Projects</h5>
+                        <p class="text-muted">Create unlimited projects within workspaces. Track progress, deadlines, and deliverables all in one view.</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5 class="fw-bold"><i class="bi bi-check2-square text-success"></i> Tasks</h5>
+                        <p class="text-muted">Break down projects into manageable tasks. Assign work, set priorities, and never miss a deadline.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-4">
+                            <h4 class="fw-bold mb-4 text-center">What You Get</h4>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-diagram-3-fill text-primary me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Unified Dashboard</h6>
+                                    <p class="text-muted small mb-0">See all your projects, tasks, and team activity at a glance</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-people-fill text-success me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Team Collaboration</h6>
+                                    <p class="text-muted small mb-0">Work together seamlessly with role-based access and permissions</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-bell-fill text-warning me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Smart Notifications</h6>
+                                    <p class="text-muted small mb-0">Stay informed with email and SMS alerts for important updates</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-graph-up-arrow text-info me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Progress Tracking</h6>
+                                    <p class="text-muted small mb-0">Monitor project health and team performance with visual insights</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-lightning-charge-fill text-danger me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Sprint Planning</h6>
+                                    <p class="text-muted small mb-0">Plan and execute agile sprints with velocity tracking</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -122,8 +220,9 @@
                             <h4 class="fw-bold">Organized Workspaces</h4>
                             <p class="text-muted">
                                 Create separate workspaces for teams, departments, or clients.
-                                Keep everything organized in one place.
+                                Keep everything organized in one centralized hub where everyone knows where to find what they need.
                             </p>
+                            <div class="badge bg-primary bg-opacity-10 text-primary">Unlimited Workspaces</div>
                         </div>
                     </div>
                 </div>
@@ -135,9 +234,10 @@
                             <i class="bi bi-list-check feature-icon"></i>
                             <h4 class="fw-bold">Task Management</h4>
                             <p class="text-muted">
-                                Break down projects into tasks and subtasks.
-                                Assign work, set deadlines, and track progress effortlessly.
+                                Break down projects into tasks and subtasks with clear assignments and deadlines.
+                                Track progress from to-do to done, all in one intuitive interface.
                             </p>
+                            <div class="badge bg-success bg-opacity-10 text-success">Drag & Drop</div>
                         </div>
                     </div>
                 </div>
@@ -149,9 +249,10 @@
                             <i class="bi bi-speedometer2 feature-icon"></i>
                             <h4 class="fw-bold">Sprint Planning</h4>
                             <p class="text-muted">
-                                Plan and execute sprints with ease.
-                                Track velocity and deliver features faster.
+                                Plan and execute agile sprints with ease. Track velocity, monitor burndown,
+                                and deliver features faster with built-in sprint management.
                             </p>
+                            <div class="badge bg-info bg-opacity-10 text-info">Agile Ready</div>
                         </div>
                     </div>
                 </div>
@@ -163,9 +264,10 @@
                             <i class="bi bi-people feature-icon"></i>
                             <h4 class="fw-bold">Team Collaboration</h4>
                             <p class="text-muted">
-                                Invite team members with role-based permissions.
-                                Collaborate with comments and real-time updates.
+                                Invite unlimited team members with role-based permissions (Owner, Admin, Member).
+                                Collaborate seamlessly with comments, mentions, and real-time updates.
                             </p>
+                            <div class="badge bg-warning bg-opacity-10 text-warning">Role-Based Access</div>
                         </div>
                     </div>
                 </div>
@@ -177,9 +279,10 @@
                             <i class="bi bi-bell feature-icon"></i>
                             <h4 class="fw-bold">Smart Notifications</h4>
                             <p class="text-muted">
-                                Get notified via email and SMS when tasks are assigned.
-                                Never miss important updates.
+                                Stay in the loop with email and SMS notifications when tasks are assigned or updated.
+                                Customize your notification preferences to stay focused.
                             </p>
+                            <div class="badge bg-danger bg-opacity-10 text-danger">Email & SMS</div>
                         </div>
                     </div>
                 </div>
@@ -191,10 +294,76 @@
                             <i class="bi bi-graph-up feature-icon"></i>
                             <h4 class="fw-bold">Progress Tracking</h4>
                             <p class="text-muted">
-                                Visualize project progress with dashboards.
-                                Monitor deadlines and team performance.
+                                Visualize project health with comprehensive dashboards showing tasks, deadlines,
+                                and team activity. Know exactly where things stand at all times.
                             </p>
+                            <div class="badge bg-secondary bg-opacity-10 text-secondary">Real-Time Insights</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">How It Works</h2>
+                <p class="lead text-muted">Get started in minutes and manage projects like a pro</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3 text-center">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">1. Create Your Account</h5>
+                    <p class="text-muted">Sign up free in seconds. No credit card required.</p>
+                </div>
+
+                <div class="col-md-3 text-center">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-info text-white d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">2. Set Up Workspaces</h5>
+                    <p class="text-muted">Create workspaces for your teams, departments, or clients.</p>
+                </div>
+
+                <div class="col-md-3 text-center">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-folder-plus"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">3. Add Projects & Tasks</h5>
+                    <p class="text-muted">Organize work into projects and break them down into tasks.</p>
+                </div>
+
+                <div class="col-md-3 text-center">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">4. Collaborate & Deliver</h5>
+                    <p class="text-muted">Invite your team, assign tasks, and deliver projects on time.</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <div class="card border-primary bg-primary bg-opacity-10 d-inline-block">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-2"><i class="bi bi-lightbulb text-primary"></i> Pro Tip</h5>
+                        <p class="mb-0 text-muted">Start with one workspace and project to familiarize yourself, then scale up as your team grows!</p>
                     </div>
                 </div>
             </div>
@@ -227,8 +396,13 @@
     <!-- CTA Section -->
     <section class="py-5 bg-primary text-white">
         <div class="container text-center">
-            <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
-            <p class="lead mb-4">Join teams who manage their projects better with FlowBoard</p>
+            <h2 class="display-5 fw-bold mb-4">Ready to Simplify Your Project Management?</h2>
+            <p class="lead mb-4">Join teams around the world who manage all their projects in one place with FlowBoard</p>
+            <div class="mb-4">
+                <span class="badge bg-light text-primary me-2 mb-2 px-3 py-2">No Credit Card Required</span>
+                <span class="badge bg-light text-primary me-2 mb-2 px-3 py-2">Unlimited Projects</span>
+                <span class="badge bg-light text-primary mb-2 px-3 py-2">Free Forever</span>
+            </div>
             <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-5">
                 <i class="bi bi-person-plus"></i> Create Free Account
             </a>
