@@ -149,7 +149,6 @@ def login_view(request):
     return render(request, 'accounts/login.html', {'form': form})
 
 
-@login_required
 def logout_view(request):
     """
     User logout view.
@@ -157,8 +156,8 @@ def logout_view(request):
     if request.method == 'POST':
         logout(request)
         messages.success(request, 'You have been logged out successfully.')
-        return redirect('accounts:login')
-    return redirect('dashboard')
+        return redirect('home')
+    return redirect('home')
 
 
 class CustomPasswordResetView(PasswordResetView):
