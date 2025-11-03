@@ -63,7 +63,8 @@
     <div class="row">
         <!-- Main Content -->
         <div class="col-lg-8">
-            <!-- Organization Code Card -->
+            {% if is_creator %}
+            <!-- Organization Code Card (Only for Creator) -->
             <div class="card mb-4 border-0 shadow-sm org-code-card">
                 <div class="card-body">
                     <h3 class="card-title mb-3">
@@ -87,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- How to Use Section -->
+            <!-- How to Use Section (Only for Creator) -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title">
@@ -101,6 +102,18 @@
                     </ol>
                 </div>
             </div>
+            {% else %}
+            <!-- Member Notice -->
+            <div class="alert alert-info border-0 shadow-sm mb-4">
+                <h5 class="alert-heading">
+                    <i class="bi bi-info-circle"></i> Organization Member
+                </h5>
+                <p class="mb-0">
+                    You are a member of this organization. To invite new members, please contact the organization creator
+                    <strong>{{ organization.created_by.username }}</strong> for the organization code.
+                </p>
+            </div>
+            {% endif %}
 
             <!-- Organization Details -->
             <div class="card border-0 shadow-sm">
@@ -115,10 +128,12 @@
                             <label class="text-muted small">Organization Name</label>
                             <p class="fw-bold mb-0">{{ organization.name }}</p>
                         </div>
+                        {% if is_creator %}
                         <div class="col-md-6 mb-3">
                             <label class="text-muted small">Organization Code</label>
                             <p class="fw-bold mb-0">{{ organization.code }}</p>
                         </div>
+                        {% endif %}
                         <div class="col-md-6 mb-3">
                             <label class="text-muted small">Total Members</label>
                             <p class="fw-bold mb-0">
@@ -173,7 +188,8 @@
                 </div>
             </div>
 
-            <!-- Security Notice -->
+            <!-- Security Notice (Only for Creator) -->
+            {% if is_creator %}
             <div class="alert alert-warning border-0 shadow-sm">
                 <h6 class="alert-heading">
                     <i class="bi bi-shield-exclamation"></i> Security Notice
@@ -182,6 +198,7 @@
                     Keep your organization code secure. Only share it with trusted team members. Anyone with this code can join your organization during registration.
                 </p>
             </div>
+            {% endif %}
 
             <!-- Quick Actions -->
             <div class="card border-0 shadow-sm mb-4">
@@ -258,8 +275,12 @@
 
 {% block extra_js %}
 <script>
+{% if is_creator %}
 function copyOrgCode() {
-    const code = document.getElementById('orgCode').textContent.trim();
+    const codeElement = document.getElementById('orgCode');
+    if (!codeElement) return;
+
+    const code = codeElement.textContent.trim();
     const copyIcon = document.getElementById('copyIcon');
     const copyText = document.getElementById('copyText');
 
@@ -303,7 +324,10 @@ function copyOrgCode() {
 }
 
 function shareOrgCode() {
-    const code = document.getElementById('orgCode').textContent.trim();
+    const codeElement = document.getElementById('orgCode');
+    if (!codeElement) return;
+
+    const code = codeElement.textContent.trim();
     const orgName = '{{ organization.name|escapejs }}';
     const shareText = `Join our organization "${orgName}" on FlowBoard!\n\nUse this code during registration: ${code}`;
 
@@ -321,5 +345,6 @@ function shareOrgCode() {
         });
     }
 }
+{% endif %}
 </script>
 {% endblock %}
