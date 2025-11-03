@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Organization Settings - FlowBoard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .org-code-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .code-display {
+        background: rgba(255,255,255,0.2);
+        border: 2px dashed rgba(255,255,255,0.5);
+        border-radius: 10px;
+        padding: 20px;
+        font-size: 2rem;
+        font-weight: bold;
+        letter-spacing: 3px;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        user-select: all;
+    }
+    .copy-btn {
+        background: rgba(255,255,255,0.3);
+        border: 2px solid rgba(255,255,255,0.5);
+        color: white;
+        transition: all 0.3s;
+    }
+    .copy-btn:hover {
+        background: rgba(255,255,255,0.5);
+        border-color: white;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .info-card {
+        border-left: 4px solid #667eea;
+        background: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Organization Settings</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 mb-0">
+                <i class="bi bi-building"></i> Organization Settings
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Organization Code Card -->
+            <div class="card mb-4 border-0 shadow-sm org-code-card">
+                <div class="card-body">
+                    <h3 class="card-title mb-3">
+                        <i class="bi bi-key"></i> Your Organization Code
+                    </h3>
+                    <p class="mb-4 opacity-75">Share this code with team members so they can join your organization</p>
+
+                    <div class="code-display mb-4" id="orgCode">
+                        {{ organization.code }}
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-lg copy-btn" onclick="copyOrgCode()">
+                            <i class="bi bi-clipboard" id="copyIcon"></i>
+                            <span id="copyText">Copy Code</span>
+                        </button>
+                        <button class="btn btn-lg copy-btn" onclick="shareOrgCode()">
+                            <i class="bi bi-share"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How to Use Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle text-primary"></i> How to Share
+                    </h5>
+                    <ol class="mb-0">
+                        <li class="mb-2">Copy the organization code above</li>
+                        <li class="mb-2">Share it with your team members via email, chat, or any secure channel</li>
+                        <li class="mb-2">They can use this code during registration when selecting "Join Organization"</li>
+                        <li>Once they join, they'll be part of your organization and can collaborate in workspaces</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Organization Details -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Organization Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Organization Name</label>
+                            <p class="fw-bold mb-0">{{ organization.name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Organization Code</label>
+                            <p class="fw-bold mb-0">{{ organization.code }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Total Members</label>
+                            <p class="fw-bold mb-0">
+                                <i class="bi bi-people"></i> {{ members_count }} member{{ members_count|pluralize }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Created Date</label>
+                            <p class="fw-bold mb-0">{{ organization.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        {% if organization.created_by %}
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Created By</label>
+                            <p class="fw-bold mb-0">
+                                {{ organization.created_by.username }}
+                                {% if is_creator %}
+                                <span class="badge bg-primary">You</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if organization.description %}
+                    <div class="mt-3">
+                        <label class="text-muted small">Description</label>
+                        <p class="mb-0">{{ organization.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-bar-chart"></i> Quick Stats
+                    </h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Members</span>
+                        <span class="badge bg-primary fs-6">{{ members_count }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Your Role</span>
+                        <span class="badge bg-success fs-6">
+                            {% if is_creator %}Creator{% else %}Member{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="alert alert-warning border-0 shadow-sm">
+                <h6 class="alert-heading">
+                    <i class="bi bi-shield-exclamation"></i> Security Notice
+                </h6>
+                <p class="small mb-0">
+                    Keep your organization code secure. Only share it with trusted team members. Anyone with this code can join your organization during registration.
+                </p>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">
+                        <i class="bi bi-lightning"></i> Quick Actions
+                    </h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'workspaces:list' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-building"></i> View Workspaces
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-speedometer2"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyOrgCode() {
+    const code = document.getElementById('orgCode').textContent.trim();
+    const copyIcon = document.getElementById('copyIcon');
+    const copyText = document.getElementById('copyText');
+
+    navigator.clipboard.writeText(code).then(function() {
+        // Show success feedback
+        copyIcon.className = 'bi bi-check-circle';
+        copyText.textContent = 'Copied!';
+
+        // Create toast notification
+        const toastHTML = `
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+                <div class="toast show" role="alert">
+                    <div class="toast-header bg-success text-white">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <strong class="me-auto">Success</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        Organization code copied to clipboard!
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+
+        // Reset button after 2 seconds
+        setTimeout(function() {
+            copyIcon.className = 'bi bi-clipboard';
+            copyText.textContent = 'Copy Code';
+        }, 2000);
+
+        // Remove toast after 3 seconds
+        setTimeout(function() {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => toast.remove());
+        }, 3000);
+    }).catch(function(err) {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy code. Please copy manually: ' + code);
+    });
+}
+
+function shareOrgCode() {
+    const code = document.getElementById('orgCode').textContent.trim();
+    const orgName = '{{ organization.name|escapejs }}';
+    const shareText = `Join our organization "${orgName}" on FlowBoard!\n\nUse this code during registration: ${code}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Join Our Organization',
+            text: shareText
+        }).catch(function(err) {
+            console.log('Share cancelled');
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(shareText).then(function() {
+            alert('Share text copied to clipboard! You can now paste it in your messaging app.');
+        });
+    }
+}
+</script>
+{% endblock %}

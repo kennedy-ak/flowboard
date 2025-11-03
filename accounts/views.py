@@ -57,19 +57,21 @@ def register_view(request):
 
         if form.is_valid() and org_valid:
             user = form.save(commit=False)
+            user.save()  # Save user first before creating organization
 
             # Handle organization
             if org_type == 'create':
                 # Create new organization
                 organization = org_create_form.save(commit=False)
-                organization.created_by = user
+                organization.created_by = user  # Now user is saved and has a primary key
                 organization.save()
                 user.organization = organization
+                user.save()  # Update user with organization
             elif org_type == 'join':
                 # Join existing organization
                 user.organization = organization
+                user.save()  # Update user with organization
 
-            user.save()
             login(request, user)
 
             # If there's a valid invitation, accept it
@@ -190,3 +192,31 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     Password reset complete view.
     """
     template_name = 'accounts/password_reset_complete.html'
+
+
+@login_required
+def organization_settings(request):
+    """
+    Organization settings view.
+    Shows organization code and details for users who belong to an organization.
+    """
+    user_organization = request.user.organization
+
+    # Check if user has an organization
+    if not user_organization:
+        messages.warning(request, 'You are not part of any organization.')
+        return redirect('dashboard')
+
+    # Check if user created this organization
+    is_creator = user_organization.created_by == request.user
+
+    # Get organization members count
+    members_count = user_organization.members.count()
+
+    context = {
+        'organization': user_organization,
+        'is_creator': is_creator,
+        'members_count': members_count,
+    }
+
+    return render(request, 'accounts/organization_settings.html', context)
