@@ -259,9 +259,15 @@ def join_organization(request):
 def leave_organization(request):
     """
     View for users to leave their current organization.
+    Creators cannot leave their own organization.
     """
     if request.method == 'POST':
         if request.user.organization:
+            # Prevent creator from leaving
+            if request.user.organization.created_by == request.user:
+                messages.error(request, 'You cannot leave an organization you created. You can delete it or transfer ownership instead.')
+                return redirect('accounts:organization_settings')
+
             org_name = request.user.organization.name
             request.user.organization = None
             request.user.save()
@@ -272,3 +278,74 @@ def leave_organization(request):
         return redirect('dashboard')
 
     return redirect('accounts:organization_settings')
+
+
+@login_required
+def organization_members(request):
+    """
+    View to list all members of the organization.
+    Only accessible by the organization creator.
+    """
+    user_organization = request.user.organization
+
+    # Check if user has an organization
+    if not user_organization:
+        messages.warning(request, 'You are not part of any organization.')
+        return redirect('dashboard')
+
+    # Check if user is the creator
+    if user_organization.created_by != request.user:
+        messages.error(request, 'Only the organization creator can view the members list.')
+        return redirect('accounts:organization_settings')
+
+    # Get all members
+    members = user_organization.members.all().order_by('-date_joined')
+
+    context = {
+        'organization': user_organization,
+        'members': members,
+        'total_members': members.count(),
+    }
+
+    return render(request, 'accounts/organization_members.html', context)
+
+
+@login_required
+def remove_organization_member(request, user_id):
+    """
+    View to remove a member from the organization.
+    Only accessible by the organization creator.
+    """
+    user_organization = request.user.organization
+
+    # Check if user has an organization
+    if not user_organization:
+        messages.warning(request, 'You are not part of any organization.')
+        return redirect('dashboard')
+
+    # Check if user is the creator
+    if user_organization.created_by != request.user:
+        messages.error(request, 'Only the organization creator can remove members.')
+        return redirect('accounts:organization_settings')
+
+    if request.method == 'POST':
+        from .models import User
+        try:
+            member = User.objects.get(id=user_id, organization=user_organization)
+
+            # Prevent removing the creator
+            if member == request.user:
+                messages.error(request, 'You cannot remove yourself from the organization.')
+                return redirect('accounts:organization_members')
+
+            member_username = member.username
+            member.organization = None
+            member.save()
+
+            messages.success(request, f'{member_username} has been removed from the organization.')
+        except User.DoesNotExist:
+            messages.error(request, 'Member not found.')
+
+        return redirect('accounts:organization_members')
+
+    return redirect('accounts:organization_members')
