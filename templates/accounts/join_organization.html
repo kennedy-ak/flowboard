@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Join Organization - FlowBoard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .join-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+    .code-input {
+        font-size: 1.5rem;
+        font-family: 'Courier New', monospace;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-align: center;
+        padding: 15px;
+        border: 3px solid #667eea;
+        border-radius: 10px;
+    }
+    .code-input:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+    }
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Join Organization</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Main Join Card -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body p-0">
+                    <div class="join-card text-center">
+                        <div class="info-icon mx-auto mb-4">
+                            <i class="bi bi-building-add"></i>
+                        </div>
+                        <h2 class="mb-3">Join an Organization</h2>
+                        <p class="mb-0 opacity-75">
+                            Enter the organization code provided by your administrator to join their team
+                        </p>
+                    </div>
+
+                    <div class="p-5">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+                                <label for="id_organization_code" class="form-label fw-bold">
+                                    <i class="bi bi-key"></i> Organization Code
+                                </label>
+                                <input
+                                    type="text"
+                                    name="organization_code"
+                                    class="form-control code-input {% if form.organization_code.errors %}is-invalid{% endif %}"
+                                    id="id_organization_code"
+                                    placeholder="ORG-ABC123"
+                                    maxlength="20"
+                                    required
+                                    value="{{ form.organization_code.value|default:'' }}"
+                                >
+                                {% if form.organization_code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.organization_code.errors.0 }}
+                                    </div>
+                                {% else %}
+                                    <div class="form-text text-center mt-3">
+                                        <i class="bi bi-info-circle"></i> Enter the code exactly as provided (e.g., ORG-ABC123)
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-box-arrow-in-right"></i> Join Organization
+                                </button>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-lightbulb text-warning"></i> How It Works
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4 text-center">
+                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <strong>1</strong>
+                            </div>
+                            <p class="small mb-0">Get the organization code from your administrator</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <strong>2</strong>
+                            </div>
+                            <p class="small mb-0">Enter the code in the form above</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <p class="small mb-0">You're now part of the organization!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-star text-warning"></i> Why Join an Organization?
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Collaborate with your team members on projects
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Access shared workspaces and tasks
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Better team coordination and communication
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Centralized project management
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-uppercase input
+    document.getElementById('id_organization_code').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Form validation
+    (function() {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

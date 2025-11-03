@@ -8,8 +8,10 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
 
-    # Organization Settings
+    # Organization Management
     path('organization/', views.organization_settings, name='organization_settings'),
+    path('organization/join/', views.join_organization, name='join_organization'),
+    path('organization/leave/', views.leave_organization, name='leave_organization'),
 
     # Password Reset URLs
     path('password-reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),

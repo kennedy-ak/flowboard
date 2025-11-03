@@ -220,3 +220,55 @@ def organization_settings(request):
     }
 
     return render(request, 'accounts/organization_settings.html', context)
+
+
+@login_required
+def join_organization(request):
+    """
+    View for existing users to join an organization using a code.
+    """
+    from .forms import OrganizationJoinForm
+
+    # Check if user already has an organization
+    if request.user.organization:
+        messages.info(request, f'You are already a member of {request.user.organization.name}. You can leave it to join another organization.')
+        return redirect('accounts:organization_settings')
+
+    if request.method == 'POST':
+        form = OrganizationJoinForm(request.POST)
+        if form.is_valid():
+            organization = form.cleaned_data.get('organization')
+
+            # Add user to organization
+            request.user.organization = organization
+            request.user.save()
+
+            messages.success(request, f'Successfully joined {organization.name}!')
+            return redirect('accounts:organization_settings')
+    else:
+        form = OrganizationJoinForm()
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'accounts/join_organization.html', context)
+
+
+@login_required
+def leave_organization(request):
+    """
+    View for users to leave their current organization.
+    """
+    if request.method == 'POST':
+        if request.user.organization:
+            org_name = request.user.organization.name
+            request.user.organization = None
+            request.user.save()
+            messages.success(request, f'You have left {org_name}.')
+        else:
+            messages.warning(request, 'You are not part of any organization.')
+
+        return redirect('dashboard')
+
+    return redirect('accounts:organization_settings')

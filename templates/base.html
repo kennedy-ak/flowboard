@@ -186,6 +186,10 @@
                             <li><a class="dropdown-item" href="{% url 'accounts:organization_settings' %}">
                                 <i class="bi bi-building-gear"></i> Organization Settings
                             </a></li>
+                            {% else %}
+                            <li><a class="dropdown-item" href="{% url 'accounts:join_organization' %}">
+                                <i class="bi bi-building-add"></i> Join Organization
+                            </a></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="#">
                                 <i class="bi bi-gear"></i> Settings
