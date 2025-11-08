@@ -168,7 +168,7 @@
                                 {% if membership.organization == user.current_organization %}
                                 <a class="dropdown-item active" href="#">
                                     <i class="bi bi-check-circle text-success"></i> {{ membership.organization.name }}
-                                    <span class="badge bg-{{ membership.role == 'owner' and 'danger' or membership.role == 'admin' and 'warning' or 'primary' }} ms-2" style="font-size: 0.65rem;">
+                                    <span class="badge ms-2 bg-{% if membership.role == 'owner' %}danger{% elif membership.role == 'admin' %}warning{% else %}primary{% endif %}" style="font-size: 0.65rem;">
                                         {{ membership.role|title }}
                                     </span>
                                 </a>
@@ -177,7 +177,7 @@
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item">
                                         <i class="bi bi-arrow-repeat"></i> {{ membership.organization.name }}
-                                        <span class="badge bg-{{ membership.role == 'owner' and 'danger' or membership.role == 'admin' and 'warning' or 'primary' }} ms-2" style="font-size: 0.65rem;">
+                                        <span class="badge ms-2 bg-{% if membership.role == 'owner' %}danger{% elif membership.role == 'admin' %}warning{% else %}primary{% endif %}" style="font-size: 0.65rem;">
                                             {{ membership.role|title }}
                                         </span>
                                     </button>
