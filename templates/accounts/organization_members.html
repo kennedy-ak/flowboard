@@ -67,30 +67,33 @@
                     </h5>
                 </div>
                 <div class="card-body p-0">
-                    {% if members %}
+                    {% if memberships %}
                     <div class="list-group list-group-flush">
-                        {% for member in members %}
+                        {% for membership in memberships %}
                         <div class="list-group-item member-card">
                             <div class="row align-items-center">
                                 <div class="col-auto">
                                     <div class="member-avatar">
-                                        {{ member.username.0|upper }}
+                                        {{ membership.user.username.0|upper }}
                                     </div>
                                 </div>
                                 <div class="col">
                                     <h6 class="mb-1">
-                                        {{ member.username }}
-                                        {% if member == organization.created_by %}
-                                        <span class="badge creator-badge text-white ms-2">
-                                            <i class="bi bi-star-fill"></i> Creator
+                                        {{ membership.user.username }}
+                                        <span class="badge
+                                            {% if membership.role == 'owner' %}creator-badge text-white
+                                            {% elif membership.role == 'admin' %}bg-warning
+                                            {% else %}bg-primary
+                                            {% endif %} ms-2">
+                                            <i class="bi bi-{% if membership.role == 'owner' %}star-fill{% elif membership.role == 'admin' %}shield-fill-check{% else %}person{% endif %}"></i>
+                                            {{ membership.role|title }}
                                         </span>
-                                        {% endif %}
                                     </h6>
                                     <p class="text-muted small mb-0">
-                                        <i class="bi bi-envelope"></i> {{ member.email }}
-                                        {% if member.phone_number %}
+                                        <i class="bi bi-envelope"></i> {{ membership.user.email }}
+                                        {% if membership.user.phone_number %}
                                         <span class="ms-3">
-                                            <i class="bi bi-telephone"></i> {{ member.phone_number }}
+                                            <i class="bi bi-telephone"></i> {{ membership.user.phone_number }}
                                         </span>
                                         {% endif %}
                                     </p>
@@ -98,18 +101,18 @@
                                 <div class="col-auto">
                                     <div class="text-end">
                                         <small class="text-muted d-block mb-2">
-                                            <i class="bi bi-calendar"></i> Joined {{ member.date_joined|date:"M d, Y" }}
+                                            <i class="bi bi-calendar"></i> Joined {{ membership.joined_at|date:"M d, Y" }}
                                         </small>
-                                        {% if member != organization.created_by %}
+                                        {% if membership.role != 'owner' %}
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-danger"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#removeMemberModal{{ member.id }}">
+                                                data-bs-target="#removeMemberModal{{ membership.user.id }}">
                                             <i class="bi bi-person-x"></i> Remove
                                         </button>
 
                                         <!-- Remove Member Modal -->
-                                        <div class="modal fade" id="removeMemberModal{{ member.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal fade" id="removeMemberModal{{ membership.user.id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <div class="modal-header bg-danger text-white">
@@ -119,13 +122,13 @@
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <p>Are you sure you want to remove <strong>{{ member.username }}</strong> from the organization?</p>
+                                                        <p>Are you sure you want to remove <strong>{{ membership.user.username }}</strong> from the organization?</p>
                                                         <div class="alert alert-warning mb-0">
                                                             <h6 class="alert-heading">
                                                                 <i class="bi bi-info-circle"></i> This action will:
                                                             </h6>
                                                             <ul class="mb-0 small">
-                                                                <li>Remove {{ member.username }} from the organization</li>
+                                                                <li>Remove {{ membership.user.username }} from the organization</li>
                                                                 <li>Revoke access to all organization workspaces</li>
                                                                 <li>Remove them from all projects and tasks</li>
                                                                 <li>They can rejoin using the organization code</li>
@@ -136,7 +139,7 @@
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                             <i class="bi bi-x-circle"></i> Cancel
                                                         </button>
-                                                        <form method="post" action="{% url 'accounts:remove_organization_member' member.id %}" class="d-inline">
+                                                        <form method="post" action="{% url 'accounts:remove_organization_member' organization.id membership.user.id %}" class="d-inline">
                                                             {% csrf_token %}
                                                             <button type="submit" class="btn btn-danger">
                                                                 <i class="bi bi-person-x"></i> Yes, Remove Member

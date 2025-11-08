@@ -150,6 +150,52 @@
                         </ul>
                     </li>
 
+                    <!-- Organization Switcher -->
+                    {% if user.current_organization %}
+                    <li class="nav-item dropdown me-2">
+                        <button class="btn btn-sm quick-create-btn text-white dropdown-toggle" type="button"
+                                id="orgSwitcherDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                title="Switch Organization">
+                            <i class="bi bi-building"></i> {{ user.current_organization.name|truncatechars:15 }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="orgSwitcherDropdown">
+                            <li><h6 class="dropdown-header">
+                                <i class="bi bi-building"></i> My Organizations
+                            </h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for membership in user.organization_memberships.all %}
+                            <li>
+                                {% if membership.organization == user.current_organization %}
+                                <a class="dropdown-item active" href="#">
+                                    <i class="bi bi-check-circle text-success"></i> {{ membership.organization.name }}
+                                    <span class="badge bg-{{ membership.role == 'owner' and 'danger' or membership.role == 'admin' and 'warning' or 'primary' }} ms-2" style="font-size: 0.65rem;">
+                                        {{ membership.role|title }}
+                                    </span>
+                                </a>
+                                {% else %}
+                                <form method="post" action="{% url 'accounts:switch_organization' membership.organization.id %}" class="d-inline w-100">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-arrow-repeat"></i> {{ membership.organization.name }}
+                                        <span class="badge bg-{{ membership.role == 'owner' and 'danger' or membership.role == 'admin' and 'warning' or 'primary' }} ms-2" style="font-size: 0.65rem;">
+                                            {{ membership.role|title }}
+                                        </span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:organization_settings' %}">
+                                <i class="bi bi-building-gear"></i> Manage Organizations
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:join_organization' %}">
+                                <i class="bi bi-building-add"></i> Join Another Organization
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
                     <!-- Notifications (Placeholder) -->
                     <li class="nav-item me-2">
                         <a class="nav-link position-relative" href="#" title="Notifications">
@@ -182,15 +228,9 @@
                                 <i class="bi bi-building"></i> My Workspaces
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            {% if user.organization %}
                             <li><a class="dropdown-item" href="{% url 'accounts:organization_settings' %}">
-                                <i class="bi bi-building-gear"></i> Organization Settings
+                                <i class="bi bi-building-gear"></i> My Organizations
                             </a></li>
-                            {% else %}
-                            <li><a class="dropdown-item" href="{% url 'accounts:join_organization' %}">
-                                <i class="bi bi-building-add"></i> Join Organization
-                            </a></li>
-                            {% endif %}
                             <li><a class="dropdown-item" href="#">
                                 <i class="bi bi-gear"></i> Settings
                             </a></li>

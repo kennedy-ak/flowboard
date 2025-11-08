@@ -5,40 +5,41 @@
 
 {% block extra_css %}
 <style>
-    .org-code-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    .org-card {
+        transition: all 0.3s;
+        border-left: 4px solid transparent;
+    }
+    .org-card.current-org {
+        border-left-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+    .org-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
     .code-display {
-        background: rgba(255,255,255,0.2);
-        border: 2px dashed rgba(255,255,255,0.5);
+        background: rgba(102, 126, 234, 0.1);
+        border: 2px dashed rgba(102, 126, 234, 0.3);
         border-radius: 10px;
-        padding: 20px;
-        font-size: 2rem;
+        padding: 15px;
+        font-size: 1.5rem;
         font-weight: bold;
-        letter-spacing: 3px;
+        letter-spacing: 2px;
         text-align: center;
         font-family: 'Courier New', monospace;
         user-select: all;
     }
-    .copy-btn {
-        background: rgba(255,255,255,0.3);
-        border: 2px solid rgba(255,255,255,0.5);
-        color: white;
-        transition: all 0.3s;
+    .role-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.65rem;
     }
-    .copy-btn:hover {
-        background: rgba(255,255,255,0.5);
-        border-color: white;
-        color: white;
-        transform: translateY(-2px);
+    .current-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        animation: pulse 2s infinite;
     }
-    .info-card {
-        border-left: 4px solid #667eea;
-        background: #f8f9fa;
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
     }
 </style>
 {% endblock %}
@@ -54,197 +55,197 @@
                     <li class="breadcrumb-item active">Organization Settings</li>
                 </ol>
             </nav>
-            <h1 class="display-6 mb-0">
-                <i class="bi bi-building"></i> Organization Settings
-            </h1>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="display-6 mb-0">
+                    <i class="bi bi-building"></i> My Organizations
+                </h1>
+                <a href="{% url 'accounts:join_organization' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Join Organization
+                </a>
+            </div>
         </div>
     </div>
 
+    {% if current_organization %}
+    <!-- Current Organization Notice -->
+    <div class="alert alert-info border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle fs-4 me-3"></i>
+            <div>
+                <strong>Current Organization:</strong> {{ current_organization.name }}
+                <p class="mb-0 small">All workspace and project operations will use this organization.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Organizations List -->
     <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            {% if is_creator %}
-            <!-- Organization Code Card (Only for Creator) -->
-            <div class="card mb-4 border-0 shadow-sm org-code-card">
+        {% for org_data in organizations_data %}
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm org-card {% if org_data.is_current %}current-org{% endif %}">
                 <div class="card-body">
-                    <h3 class="card-title mb-3">
-                        <i class="bi bi-key"></i> Your Organization Code
-                    </h3>
-                    <p class="mb-4 opacity-75">Share this code with team members so they can join your organization</p>
-
-                    <div class="code-display mb-4" id="orgCode">
-                        {{ organization.code }}
-                    </div>
-
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button class="btn btn-lg copy-btn" onclick="copyOrgCode()">
-                            <i class="bi bi-clipboard" id="copyIcon"></i>
-                            <span id="copyText">Copy Code</span>
-                        </button>
-                        <button class="btn btn-lg copy-btn" onclick="shareOrgCode()">
-                            <i class="bi bi-share"></i> Share
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- How to Use Section (Only for Creator) -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-info-circle text-primary"></i> How to Share
-                    </h5>
-                    <ol class="mb-0">
-                        <li class="mb-2">Copy the organization code above</li>
-                        <li class="mb-2">Share it with your team members via email, chat, or any secure channel</li>
-                        <li class="mb-2">They can use this code during registration when selecting "Join Organization"</li>
-                        <li>Once they join, they'll be part of your organization and can collaborate in workspaces</li>
-                    </ol>
-                </div>
-            </div>
-            {% else %}
-            <!-- Member Notice -->
-            <div class="alert alert-info border-0 shadow-sm mb-4">
-                <h5 class="alert-heading">
-                    <i class="bi bi-info-circle"></i> Organization Member
-                </h5>
-                <p class="mb-0">
-                    You are a member of this organization. To invite new members, please contact the organization creator
-                    <strong>{{ organization.created_by.username }}</strong> for the organization code.
-                </p>
-            </div>
-            {% endif %}
-
-            <!-- Organization Details -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-info-circle"></i> Organization Details
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Organization Name</label>
-                            <p class="fw-bold mb-0">{{ organization.name }}</p>
-                        </div>
-                        {% if is_creator %}
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Organization Code</label>
-                            <p class="fw-bold mb-0">{{ organization.code }}</p>
-                        </div>
-                        {% endif %}
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Total Members</label>
-                            <p class="fw-bold mb-0">
-                                <i class="bi bi-people"></i> {{ members_count }} member{{ members_count|pluralize }}
-                            </p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Created Date</label>
-                            <p class="fw-bold mb-0">{{ organization.created_at|date:"M d, Y" }}</p>
-                        </div>
-                        {% if organization.created_by %}
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Created By</label>
-                            <p class="fw-bold mb-0">
-                                {{ organization.created_by.username }}
-                                {% if is_creator %}
-                                <span class="badge bg-primary">You</span>
+                    <!-- Organization Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="card-title mb-1">
+                                {{ org_data.organization.name }}
+                                {% if org_data.is_current %}
+                                <span class="badge current-badge text-white role-badge ms-2">
+                                    <i class="bi bi-check-circle"></i> Current
+                                </span>
                                 {% endif %}
-                            </p>
+                            </h4>
+                            <span class="badge
+                                {% if org_data.role == 'owner' %}bg-danger
+                                {% elif org_data.role == 'admin' %}bg-warning
+                                {% else %}bg-primary
+                                {% endif %} role-badge">
+                                <i class="bi bi-person-badge"></i> {{ org_data.role|title }}
+                            </span>
                         </div>
-                        {% endif %}
+
+                        <!-- Actions Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                {% if not org_data.is_current %}
+                                <li>
+                                    <form method="post" action="{% url 'accounts:switch_organization' org_data.organization.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-arrow-repeat text-primary"></i> Switch to This Org
+                                        </button>
+                                    </form>
+                                </li>
+                                {% endif %}
+                                {% if org_data.is_owner %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'accounts:organization_members_detail' org_data.organization.id %}">
+                                        <i class="bi bi-people text-info"></i> Manage Members
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if not org_data.is_owner %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button type="button" class="dropdown-item text-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#leaveOrgModal{{ org_data.organization.id }}">
+                                        <i class="bi bi-box-arrow-left"></i> Leave Organization
+                                    </button>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </div>
 
-                    {% if organization.description %}
+                    <!-- Organization Code (Only for owners) -->
+                    {% if org_data.is_owner %}
+                    <div class="mb-3">
+                        <label class="text-muted small d-block mb-2">
+                            <i class="bi bi-key"></i> Organization Code
+                        </label>
+                        <div class="code-display" id="orgCode{{ org_data.organization.id }}">
+                            {{ org_data.organization.code }}
+                        </div>
+                        <div class="d-flex gap-2 mt-2">
+                            <button class="btn btn-sm btn-outline-primary" onclick="copyOrgCode('{{ org_data.organization.code }}', {{ org_data.organization.id }})">
+                                <i class="bi bi-clipboard" id="copyIcon{{ org_data.organization.id }}"></i>
+                                <span id="copyText{{ org_data.organization.id }}">Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Organization Info -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="text-muted small d-block">Members</label>
+                            <p class="mb-0 fw-bold">
+                                <i class="bi bi-people"></i> {{ org_data.members_count }}
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small d-block">Created</label>
+                            <p class="mb-0 fw-bold">{{ org_data.organization.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+
+                    {% if org_data.organization.description %}
                     <div class="mt-3">
-                        <label class="text-muted small">Description</label>
-                        <p class="mb-0">{{ organization.description }}</p>
+                        <label class="text-muted small d-block">Description</label>
+                        <p class="mb-0 small">{{ org_data.organization.description }}</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Members Preview (Only for Creator) -->
-            {% if is_creator %}
-            <div class="card border-0 shadow-sm mt-4">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-people"></i> Organization Members
-                    </h5>
-                    <a href="{% url 'accounts:organization_members' %}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-gear"></i> Manage All
-                    </a>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-3">
-                        View and manage all members in your organization. You can remove members or invite new ones.
-                    </p>
-                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
-                        <div>
-                            <h6 class="mb-0">Total Members</h6>
-                            <p class="text-muted small mb-0">Active members in organization</p>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-primary fs-5">{{ members_count }}</span>
-                        </div>
-                    </div>
-                    <div class="d-grid gap-2 mt-3">
-                        <a href="{% url 'accounts:organization_members' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-people"></i> View All Members
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Quick Stats -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-bar-chart"></i> Quick Stats
-                    </h5>
-                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                        <span class="text-muted">Members</span>
-                        <span class="badge bg-primary fs-6">{{ members_count }}</span>
+        <!-- Leave Organization Modal for this org -->
+        {% if not org_data.is_owner %}
+        <div class="modal fade" id="leaveOrgModal{{ org_data.organization.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle"></i> Leave Organization
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Your Role</span>
-                        <span class="badge bg-success fs-6">
-                            {% if is_creator %}Creator{% else %}Member{% endif %}
-                        </span>
+                    <div class="modal-body">
+                        <p class="mb-3">Are you sure you want to leave <strong>{{ org_data.organization.name }}</strong>?</p>
+                        <div class="alert alert-warning mb-0">
+                            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Important</h6>
+                            <ul class="mb-0 small">
+                                <li>You will lose access to all workspaces in this organization</li>
+                                <li>You will be removed from all projects and tasks</li>
+                                <li>You can rejoin using the organization code if needed</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                        <form method="post" action="{% url 'accounts:leave_organization' org_data.organization.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-box-arrow-left"></i> Yes, Leave
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
 
-            <!-- Security Notice (Only for Creator) -->
-            {% if is_creator %}
-            <div class="alert alert-warning border-0 shadow-sm">
-                <h6 class="alert-heading">
-                    <i class="bi bi-shield-exclamation"></i> Security Notice
-                </h6>
-                <p class="small mb-0">
-                    Keep your organization code secure. Only share it with trusted team members. Anyone with this code can join your organization during registration.
-                </p>
-            </div>
-            {% endif %}
+    <!-- Empty State -->
+    {% if not organizations_data %}
+    <div class="text-center py-5">
+        <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>
+        <h3 class="mt-3">No Organizations</h3>
+        <p class="text-muted">You haven't joined any organizations yet.</p>
+        <a href="{% url 'accounts:join_organization' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Join an Organization
+        </a>
+    </div>
+    {% endif %}
 
-            <!-- Quick Actions -->
-            <div class="card border-0 shadow-sm mb-4">
+    <!-- Quick Actions Sidebar -->
+    {% if current_organization %}
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <h6 class="card-title mb-3">
                         <i class="bi bi-lightning"></i> Quick Actions
                     </h6>
-                    <div class="d-grid gap-2">
-                        {% if is_creator %}
-                        <a href="{% url 'accounts:organization_members' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-people"></i> Manage Members
-                        </a>
-                        {% endif %}
+                    <div class="d-flex flex-wrap gap-2">
                         <a href="{% url 'workspaces:list' %}" class="btn btn-outline-primary">
                             <i class="bi bi-building"></i> View Workspaces
                         </a>
@@ -254,137 +255,33 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Leave Organization (Only for Members, not Creator) -->
-            {% if not is_creator %}
-            <div class="card border-0 shadow-sm border-danger">
-                <div class="card-body">
-                    <h6 class="card-title text-danger mb-3">
-                        <i class="bi bi-exclamation-triangle"></i> Danger Zone
-                    </h6>
-                    <p class="small text-muted mb-3">
-                        Leaving the organization will remove you from all shared workspaces and projects.
-                    </p>
-                    <button type="button" class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#leaveOrgModal">
-                        <i class="bi bi-box-arrow-left"></i> Leave Organization
-                    </button>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
-</div>
-
-<!-- Leave Organization Confirmation Modal -->
-<div class="modal fade" id="leaveOrgModal" tabindex="-1" aria-labelledby="leaveOrgModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="leaveOrgModalLabel">
-                    <i class="bi bi-exclamation-triangle"></i> Leave Organization
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-3">Are you sure you want to leave <strong>{{ organization.name }}</strong>?</p>
-                <div class="alert alert-warning mb-0">
-                    <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Important</h6>
-                    <ul class="mb-0 small">
-                        <li>You will lose access to all workspaces in this organization</li>
-                        <li>You will be removed from all projects and tasks</li>
-                        <li>You can rejoin using the organization code if needed</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cancel
-                </button>
-                <form method="post" action="{% url 'accounts:leave_organization' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-box-arrow-left"></i> Yes, Leave Organization
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+    {% endif %}
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-{% if is_creator %}
-function copyOrgCode() {
-    const codeElement = document.getElementById('orgCode');
-    if (!codeElement) return;
-
-    const code = codeElement.textContent.trim();
-    const copyIcon = document.getElementById('copyIcon');
-    const copyText = document.getElementById('copyText');
+function copyOrgCode(code, orgId) {
+    const copyIcon = document.getElementById('copyIcon' + orgId);
+    const copyText = document.getElementById('copyText' + orgId);
 
     navigator.clipboard.writeText(code).then(function() {
         // Show success feedback
         copyIcon.className = 'bi bi-check-circle';
         copyText.textContent = 'Copied!';
 
-        // Create toast notification
-        const toastHTML = `
-            <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-                <div class="toast show" role="alert">
-                    <div class="toast-header bg-success text-white">
-                        <i class="bi bi-check-circle me-2"></i>
-                        <strong class="me-auto">Success</strong>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                    </div>
-                    <div class="toast-body">
-                        Organization code copied to clipboard!
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', toastHTML);
-
         // Reset button after 2 seconds
         setTimeout(function() {
             copyIcon.className = 'bi bi-clipboard';
-            copyText.textContent = 'Copy Code';
+            copyText.textContent = 'Copy';
         }, 2000);
-
-        // Remove toast after 3 seconds
-        setTimeout(function() {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(toast => toast.remove());
-        }, 3000);
     }).catch(function(err) {
         console.error('Failed to copy:', err);
         alert('Failed to copy code. Please copy manually: ' + code);
     });
 }
-
-function shareOrgCode() {
-    const codeElement = document.getElementById('orgCode');
-    if (!codeElement) return;
-
-    const code = codeElement.textContent.trim();
-    const orgName = '{{ organization.name|escapejs }}';
-    const shareText = `Join our organization "${orgName}" on FlowBoard!\n\nUse this code during registration: ${code}`;
-
-    if (navigator.share) {
-        navigator.share({
-            title: 'Join Our Organization',
-            text: shareText
-        }).catch(function(err) {
-            console.log('Share cancelled');
-        });
-    } else {
-        // Fallback: copy to clipboard
-        navigator.clipboard.writeText(shareText).then(function() {
-            alert('Share text copied to clipboard! You can now paste it in your messaging app.');
-        });
-    }
-}
-{% endif %}
 </script>
 {% endblock %}

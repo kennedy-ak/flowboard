@@ -107,9 +107,18 @@ def workspace_edit(request, pk):
 @workspace_admin_required
 def workspace_delete(request, pk):
     """
-    Delete workspace. Only admins can delete.
+    Delete workspace. Only workspace admins AND organization admins/owners can delete.
     """
     workspace = request.workspace
+
+    # Additional check: Only organization admins or owners can delete workspaces
+    if request.user.current_organization:
+        if not request.user.is_admin_in_organization(request.user.current_organization):
+            messages.error(request, 'Only organization admins and owners can delete workspaces.')
+            return redirect('workspaces:detail', pk=pk)
+    else:
+        messages.error(request, 'You must be part of an organization to delete workspaces.')
+        return redirect('workspaces:detail', pk=pk)
 
     if request.method == 'POST':
         workspace_name = workspace.name
@@ -168,24 +177,24 @@ def workspace_add_member(request, pk):
     # Get users who are not already members AND from the same organization
     existing_member_ids = workspace.members.values_list('user_id', flat=True)
 
-    # Filter users: must be from same organization as the requesting user
-    if request.user.organization:
-        # Show only users from the same organization
+    # Filter users: must be from same organization as the requesting user's current organization
+    if request.user.current_organization:
+        # Show only users from the same organization (using the new many-to-many relationship)
         available_users = User.objects.filter(
-            organization=request.user.organization
+            organizations=request.user.current_organization
         ).exclude(id__in=existing_member_ids)
     else:
-        # If user has no organization, they can't add anyone
+        # If user has no current organization, they can't add anyone
         available_users = User.objects.none()
 
     form.fields['user'].queryset = available_users
 
     # Add warning message if no users are available
     if not available_users.exists():
-        if not request.user.organization:
-            messages.info(request, 'You must join an organization before you can add members to workspaces.')
+        if not request.user.current_organization:
+            messages.info(request, 'You must join an organization and set it as your current organization before you can add members to workspaces.')
         else:
-            messages.info(request, 'No users from your organization are available to add. Share your organization code to invite more members.')
+            messages.info(request, f'No users from your current organization ({request.user.current_organization.name}) are available to add. Share your organization code to invite more members.')
 
     context = {
         'form': form,
@@ -198,11 +207,17 @@ def workspace_add_member(request, pk):
 @workspace_admin_required
 def workspace_remove_member(request, pk, member_id):
     """
-    Remove a member from the workspace. Only admins can remove members.
+    Remove a member from the workspace. Only workspace admins AND organization admins/owners can remove members.
     Cannot remove yourself if you're the last admin.
     """
     workspace = request.workspace
     member = get_object_or_404(WorkspaceMember, pk=member_id, workspace=workspace)
+
+    # Additional check: Only organization admins or owners can remove members
+    if request.user.current_organization:
+        if not request.user.is_admin_in_organization(request.user.current_organization):
+            messages.error(request, 'Only organization admins and owners can remove workspace members.')
+            return redirect('workspaces:members', pk=pk)
 
     # Prevent removing the last admin
     if member.role == 'admin':
