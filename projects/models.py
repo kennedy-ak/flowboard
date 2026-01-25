@@ -37,7 +37,7 @@ class Sprint(models.Model):
     name = models.CharField(max_length=200)
     start_date = models.DateField()
     end_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='upcoming')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='upcoming', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

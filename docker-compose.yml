@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: flowboard_db
+    restart: always
+    environment:
+      POSTGRES_DB: flowboard
+      POSTGRES_USER: flowboard_user
+      POSTGRES_PASSWORD: flowboard_password_change_in_production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowboard_user -d flowboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: flowboard_web
+    restart: always
+    ports:
+      - "8009:8009"
+    environment:
+      # Django settings
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-docker-dev-key-change-in-production}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+
+      # Database settings
+      DATABASE_ENGINE: django.db.backends.postgresql
+      DATABASE_NAME: flowboard
+      DATABASE_USER: flowboard_user
+      DATABASE_PASSWORD: flowboard_password_change_in_production
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_SSLMODE: disable
+
+      # Site URL
+      SITE_URL: ${SITE_URL:-http://localhost:8009}
+
+      # Email settings (configure your SMTP)
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@flowboard.com}
+
+      # SMS settings (Mnotify)
+      MNOTIFY_API_KEY: ${MNOTIFY_API_KEY:-}
+      MNOTIFY_SENDER: ${MNOTIFY_SENDER:-FlowBoard}
+
+      # CSRF settings
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8009}
+
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["/app/entrypoint.sh"]
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

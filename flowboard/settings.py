@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'background_task',  # Background task processing
     'accounts',
     'workspaces',
     'projects',
@@ -52,7 +53,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',  # Cache middleware (before CommonMiddleware)
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',  # Cache middleware (after CommonMiddleware)
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'flowboard.middleware.AuthenticationDebugMiddleware',  # Uncomment to debug authentication issues
@@ -112,6 +115,26 @@ else:
     }
 
 
+# Cache Configuration
+# https://docs.djangoproject.com/en/5.2/topics/cache/
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'flowboard_cache_table',
+        'OPTIONS': {
+            'MAX_ENTRIES': 5000,
+            'CULL_FREQUENCY': 3,  # Delete 1/3 when max entries reached
+        },
+        'TIMEOUT': 300,  # 5 minutes default timeout
+    }
+}
+
+# Cache configuration for middleware
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutes
+CACHE_MIDDLEWARE_KEY_PREFIX = 'flowboard'
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -168,8 +191,8 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
 # Session Configuration
-SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
-SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds (improved UX)
+SESSION_SAVE_EVERY_REQUEST = False  # Only save when session data changes (performance optimization)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Don't expire when browser closes
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
 SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
@@ -196,3 +219,10 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', '')
 # SMS Configuration (Mnotify API)
 MNOTIFY_API_KEY = os.getenv('MNOTIFY_API_KEY', '')
 MNOTIFY_SENDER = os.getenv('MNOTIFY_SENDER', 'FlowBoard')
+
+# Background Task Configuration
+BACKGROUND_TASK_RUN_ASYNC = True  # Run tasks asynchronously
+BACKGROUND_TASK_ASYNC_THREADS = 4  # Number of worker threads
+BACKGROUND_TASK_MAX_ATTEMPTS = 3  # Retry failed tasks 3 times
+BACKGROUND_TASK_MAX_RUN_TIME = 300  # 5 minutes max execution time
+BACKGROUND_TASK_PRIORITY_ORDERING = 'DESC'  # Higher priority first

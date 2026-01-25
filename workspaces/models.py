@@ -37,7 +37,7 @@ class WorkspaceMember(models.Model):
     
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='members')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='workspace_memberships')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='member')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='member', db_index=True)
     joined_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -69,7 +69,7 @@ class WorkspaceInvitation(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_invitations')
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
+    is_used = models.BooleanField(default=False, db_index=True)
     used_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='accepted_invitations')
     used_at = models.DateTimeField(null=True, blank=True)
 

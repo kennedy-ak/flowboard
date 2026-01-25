@@ -4,11 +4,11 @@ Signal handlers for task assignment notifications.
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from .models import Task, Subtask
-from .utils import (
-    send_task_assignment_email,
-    send_task_assignment_sms,
-    send_subtask_assignment_email,
-    send_subtask_assignment_sms
+from .tasks import (
+    send_task_assignment_email_async,
+    send_task_assignment_sms_async,
+    send_subtask_assignment_email_async,
+    send_subtask_assignment_sms_async
 )
 import logging
 
@@ -30,23 +30,15 @@ def task_assignment_notification(sender, instance, action, pk_set, **kwargs):
     """
     if action == "post_add" and pk_set:
         # Users have been added to the task
-        from accounts.models import User
-
         for user_id in pk_set:
             try:
-                user = User.objects.get(pk=user_id)
+                # Queue background tasks (non-blocking)
+                send_task_assignment_email_async(user_id, instance.id)
+                send_task_assignment_sms_async(user_id, instance.id)
 
-                # Send email notification
-                send_task_assignment_email(user, instance)
-
-                # Send SMS notification
-                send_task_assignment_sms(user, instance)
-
-                logger.info(f"Notifications sent to {user.username} for task '{instance.title}'")
-            except User.DoesNotExist:
-                logger.error(f"User with ID {user_id} does not exist")
+                logger.info(f"Background notifications queued for user {user_id}, task '{instance.title}'")
             except Exception as e:
-                logger.error(f"Error sending notifications to user {user_id}: {str(e)}")
+                logger.error(f"Error queuing notifications for user {user_id}: {str(e)}")
 
 
 @receiver(m2m_changed, sender=Subtask.assigned_to.through)
@@ -64,20 +56,12 @@ def subtask_assignment_notification(sender, instance, action, pk_set, **kwargs):
     """
     if action == "post_add" and pk_set:
         # Users have been added to the subtask
-        from accounts.models import User
-
         for user_id in pk_set:
             try:
-                user = User.objects.get(pk=user_id)
+                # Queue background tasks (non-blocking)
+                send_subtask_assignment_email_async(user_id, instance.id)
+                send_subtask_assignment_sms_async(user_id, instance.id)
 
-                # Send email notification
-                send_subtask_assignment_email(user, instance)
-
-                # Send SMS notification
-                send_subtask_assignment_sms(user, instance)
-
-                logger.info(f"Notifications sent to {user.username} for subtask '{instance.title}'")
-            except User.DoesNotExist:
-                logger.error(f"User with ID {user_id} does not exist")
+                logger.info(f"Background notifications queued for user {user_id}, subtask '{instance.title}'")
             except Exception as e:
-                logger.error(f"Error sending notifications to user {user_id}: {str(e)}")
+                logger.error(f"Error queuing notifications for user {user_id}: {str(e)}")

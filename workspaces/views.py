@@ -312,10 +312,10 @@ def workspace_invite_user(request, pk):
 
             invitation.save()
 
-            # Send invitation email and SMS
-            from .utils import send_invitation_email, send_invitation_sms
-            send_invitation_email(invitation, request)
-            send_invitation_sms(invitation, request)
+            # Queue background tasks for invitation email and SMS
+            from .tasks import send_invitation_email_async, send_invitation_sms_async
+            send_invitation_email_async(invitation.id)
+            send_invitation_sms_async(invitation.id)
 
             # Success message based on whether phone was provided
             if invitation.recipient_phone:
