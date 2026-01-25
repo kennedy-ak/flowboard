@@ -1,5 +1,6 @@
 Django
 httpx
 pillow
+psycopg[binary]
 python-decouple
 python-dotenv

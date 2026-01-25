@@ -60,3 +60,4 @@ htmlcov/
 # Backup files
 *.bak
 *.tmp
+.python-version
