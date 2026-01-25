@@ -1,7 +1,10 @@
 # Environment variables
 .env
+.env.*
 .env.local
-.env.*.local
+.env.neon
+.env.docker
+.env.docker.example
 
 # Python
 __pycache__/

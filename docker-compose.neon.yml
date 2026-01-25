@@ -1,0 +1,49 @@
+services:
+  web:
+    build: .
+    container_name: flowboard_web
+    restart: always
+    ports:
+      - "8009:8009"
+    environment:
+      # Django settings
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-docker-dev-key-change-in-production}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+
+      # Database settings - NEON CLOUD
+      DATABASE_ENGINE: django.db.backends.postgresql
+      DATABASE_NAME: ${DATABASE_NAME:-neondb}
+      DATABASE_USER: ${DATABASE_USER:-neondb_owner}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST:-ep-lucky-leaf-ahtl8j6h-pooler.c-3.us-east-1.aws.neon.tech}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_SSLMODE: ${DATABASE_SSLMODE:-require}
+
+      # Site URL
+      SITE_URL: ${SITE_URL:-http://localhost:8009}
+
+      # Email settings
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
+
+      # SMS settings (Mnotify)
+      MNOTIFY_API_KEY: ${MNOTIFY_API_KEY:-}
+      MNOTIFY_SENDER: ${MNOTIFY_SENDER:-FlowBoard}
+
+      # CSRF settings
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8009}
+
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    command: ["/app/entrypoint.sh"]
+
+volumes:
+  static_volume:
+  media_volume:
